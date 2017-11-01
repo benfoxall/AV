@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>AV</title>
+    <style media="screen">
+      canvas, video {outline: 2px solid #08f;}
+      canvas {width: 300px;  image-rendering: pixelated;}
+    </style>
+  </head>
+  <body>
+    <script>
+      const video = document.createElement('video')
+      const cSource = document.createElement('canvas')
+      const cTarget = document.createElement('canvas')
+      const ctxSource = cSource.getContext('2d')
+      const ctxTarget = cTarget.getContext('2d')
+
+      ;[video, cSource, cTarget].forEach(e => document.body.appendChild(e))
+
+      const audioCtx = new AudioContext()
+
+
+      async function start() {
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: false, video: {width: 64}
+        })
+
+        video.srcObject = stream
+
+        await new Promise(r => video.onloadedmetadata = r)
+
+        video.play()
+
+        for(var c of document.querySelectorAll('canvas')) {
+          c.width  = video.videoWidth
+          c.height = video.videoHeight
+        }
+
+        function loop() {
+          requestAnimationFrame(loop)
+          ctxSource.drawImage(video, 0, 0 )
+        }
+
+        loop()
+
+        // loop()
+
+        const source = audioCtx.createScriptProcessor(4096,2,2)
+        const output = audioCtx.createScriptProcessor(4096,2,2)
+
+        source.onaudioprocess = evt => {
+          const imData = ctxSource.getImageData(0,0,64,64)
+
+          const outputBuffer = evt.outputBuffer
+          const auData = outputBuffer.getChannelData(0)
+          const auData1 = outputBuffer.getChannelData(1)
+
+          for (var i = 0; i < auData.length; i++) {
+            auData[i] = imData.data[i]
+            auData1[i] = imData.data[i + auData.length]
+          }
+
+        }
+        output.onaudioprocess = evt => {
+          const imData = ctxTarget.getImageData(0,0,64,64)
+
+          const inputBuffer = evt.inputBuffer
+          const auData = inputBuffer.getChannelData(0)
+          const auData1 = inputBuffer.getChannelData(1)
+
+          for (var i = 0; i < auData.length; i++) {
+            imData.data[i] = auData[i]
+            imData.data[i + auData.length] = auData1[i]
+          }
+
+
+          ctxTarget.putImageData(imData,0,0)
+
+        }
+
+        source.connect(output)
+        output.connect(audioCtx.destination)
+
+      }
+
+      start()
+    </script>
+  </body>
+</html>
