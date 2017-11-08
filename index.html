@@ -47,8 +47,8 @@
 
         // loop()
 
-        const source = audioCtx.createScriptProcessor(4096,2,2)
-        const output = audioCtx.createScriptProcessor(4096,2,2)
+        const source = audioCtx.createScriptProcessor(8192,2,2)
+        const output = audioCtx.createScriptProcessor(8192,2,2)
 
         source.onaudioprocess = evt => {
           const imData = ctxSource.getImageData(0,0,64,64)
