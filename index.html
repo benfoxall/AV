@@ -4,13 +4,22 @@
     <meta charset="utf-8">
     <title>AV</title>
     <style media="screen">
-      canvas, video {outline: 2px solid #08f;}
-      canvas {width: 300px;  image-rendering: pixelated;}
+      body {text-align: center;}
+      canvas {margin: 1em; width: 300px; image-rendering: pixelated; background: #eee;}
     </style>
   </head>
   <body>
     <script>
       const audioCtx = new AudioContext()
+
+      // Connect two audio nodes together
+      const patch = (a, b) => {
+        const gain = audioCtx.createGain()
+        a.connect(gain)
+        gain.connect(b)
+      }
+
+
       const video = document.createElement('video')
       const cSource = document.createElement('canvas')
       const cTarget = document.createElement('canvas')
@@ -73,7 +82,9 @@
           ctxTarget.putImageData(imData,0,0)
         }
 
-        source.connect(output)
+        // source.connect(output)
+        patch(source, output)
+
         output.connect(audioCtx.destination)
 
       }
