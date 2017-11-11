@@ -4,19 +4,60 @@
     <meta charset="utf-8">
     <title>AV</title>
     <style media="screen">
-      body {text-align: center;}
-      canvas {margin: 1em; width: 300px; image-rendering: pixelated; background: #eee;}
+      body {text-align: center; font-family: sans-serif;}
+      canvas {margin: 1em; height: 300px; image-rendering: pixelated; background: #eee;}
+      h2 { margin: 0 }
     </style>
   </head>
   <body>
+    <div>
+      <template id="t">
+        <label>
+          <h2>x</h2>
+          <input type="range" />
+        </label>
+      </template>
+    </div>
+
+
     <script>
       const audioCtx = new AudioContext()
 
-      // Connect two audio nodes together
+      // Connect image input
       const patch = (a, b) => {
         const gain = audioCtx.createGain()
+
+        const biquadFilter = audioCtx.createBiquadFilter()
+        biquadFilter.type = "lowpass"
+        biquadFilter.frequency.value = 1000
+        biquadFilter.gain.value = 3
+
         a.connect(gain)
         gain.connect(b)
+        // biquadFilter.connect(b)
+
+        new Slider(gain.gain, 0, 1, 'Gain')
+        new Slider(gain.frequency, 0, 10000, 'fr')
+      }
+
+      class Slider{
+        constructor (prop, min, max, label) {
+          this.prop = prop
+
+          const clone = document.importNode(t.content, true)
+          const h2 = clone.querySelector('h2')
+          const input = clone.querySelector('input')
+
+          h2.textContent = label
+          Object.assign(input, {min, max, step: (max-min)/100})
+          input.addEventListener('input', this)
+
+          t.parentNode.appendChild(clone)
+
+        }
+        handleEvent(e) {
+          this.prop.value = parseFloat(e.target.value)
+        }
       }
 
 
