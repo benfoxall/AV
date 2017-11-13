@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>AV</title>
+    <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
+    <style media="screen">
+      body {
+        font-family: 'VT323', monospace;
+        text-align: center;
+        background: #eee;
+        margin: 5vmin 0;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      #choose {
+        width: 80vmin;
+        height: 60vmin;
+        margin: auto;
+        text-align: left;
+        background: #000;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        -webkit-font-smoothing: none;
+        text-transform: uppercase;
+      }
+      #choose h2, #choose h3{
+        margin: 0 1rem;
+        font-weight: 100;
+      }
+      #choose h2 {
+        font-size: 1.25em;
+        opacity: .5
+      }
+      #choose h3 {
+        font-size: 2em;
+      }
+      #choose a:hover {
+        color: aquamarine
+      }
+      canvas {
+        height: 30vmin;
+        width: 80vw;
+      }
+    </style>
+  </head>
+  <body>
+    <section id="choose">
+      <h2>Source:</h2>
+      <h3><a href="#camera">Camera</a></h3>
+      <h3><a href="#demo">Demo file</a></h3>
+    </section>
+    <canvas id="canvas" height="400" width="1024"></canvas>
+
+    <script type="text/javascript">
+      const ctx = canvas.getContext('2d')
+      ctx.strokeStyle = '#333'
+      ctx.beginPath()
+      ctx.moveTo(0,100)
+      for (var i = 0; i < 1024; i++) {
+        ctx.lineTo(i,((Math.random()-.5)*40) + 100)
+      }
+
+      ctx.lineTo(1024, 100)
+
+      ctx.moveTo(0,300)
+      for (var i = 0; i < 1024; i++) {
+        ctx.lineTo(i,((Math.random()-.5)*40) + 300)
+      }
+      ctx.lineTo(1024, 300)
+      ctx.stroke()
+    </script>
+  </body>
+</html>
