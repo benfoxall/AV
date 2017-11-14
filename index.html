@@ -3,134 +3,211 @@
   <head>
     <meta charset="utf-8">
     <title>AV</title>
+    <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
     <style media="screen">
-      body {text-align: center; font-family: sans-serif;}
-      canvas {margin: 1em; height: 300px; image-rendering: pixelated; background: #eee;}
-      h2 { margin: 0 }
+      body {
+        font-family: 'VT323', monospace;
+        text-align: center;
+        background: #ddd;
+        margin: 5vmin 0;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      #choose {
+        width: 90vmin;
+        height: 64vmin;
+        margin: auto;
+        text-align: left;
+        background: #000;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        -webkit-font-smoothing: none;
+        text-transform: uppercase;
+        position: relative;
+      }
+      #choose h2, #choose h3{
+        margin: 0 1rem;
+        font-weight: 100;
+      }
+      #choose h2 {
+        font-size: 1.25em;
+        opacity: .5
+      }
+      #choose h3 {
+        font-size: 2em;
+      }
+      #choose a:hover {
+        color: aquamarine
+      }
+      #canvas {
+        height: 26vmin;
+        width: 90vw;
+      }
+      #choose source, #choose video {
+        position: absolute;
+        top:0;
+        width: 90vmin;
+        height: 64vmin;
+        image-rendering: pixelated;
+        transform: scaleX(-1);
+      }
     </style>
   </head>
   <body>
-    <div>
-      <template id="t">
-        <label>
-          <h2>x</h2>
-          <input type="range" />
-        </label>
-      </template>
-    </div>
+    <section id="choose">
+      <section id="source">
+        <!-- <h2>Source:</h2> -->
+        <h3><a href="#camera">Access webcam</a></h3>
+        <h2>WARNING, this is noisy</h2>
+        <!-- <h3><a href="#demo">Demo file</a></h3> -->
+      </section>
+      <canvas id="source" width="90" height="64"></canvas>
+    </section>
+    <canvas id="canvas" height="400" width="1024"></canvas>
+
+    <script type="text/javascript">
+      const ctx = canvas.getContext('2d')
+      ctx.strokeStyle = '#000'
+
+      function draw(left, right) {
+        ctx.clearRect(0,0, 1024, 400)
+        const s = 1024 / left.length
+
+        ctx.beginPath()
+        ctx.moveTo(0,100)
+        for (var i = 0; i < left.length; i++) {
+          ctx.lineTo(i*s, (left[i]/3) + 100)
+        }
+
+        ctx.moveTo(0,300)
+        for (var i = 0; i < left.length; i++) {
+          ctx.lineTo(i*s, (right[i]/3) + 200)
+        }
 
 
-    <script>
+        ctx.stroke()
+
+
+      }
+
+
+
+
+      class AVBridge {
+        constructor(audioCtx) {
+          this.audioCtx = audioCtx
+        }
+        toAudio(video) {
+          const canvas = document.createElement('canvas')
+          canvas.width = 90
+          canvas.height = 64
+
+          const ctx = canvas.getContext('2d')
+
+          const node = this.audioCtx.createScriptProcessor(8192,2,2)
+          node.onaudioprocess = evt => {
+            ctx.drawImage(video, 0, 0)
+            const imData = ctx.getImageData(0,0,90,64)
+
+            const outputBuffer = evt.outputBuffer
+            const auData = outputBuffer.getChannelData(0)
+            const auData1 = outputBuffer.getChannelData(1)
+
+            auData.fill(150)
+
+            const l = 90*32
+            for (var i = 0; i < l; i++) {
+              auData[i * 3    ] = imData.data[i * 4    ]
+              auData[i * 3 + 1] = imData.data[i * 4 + 1]
+              auData[i * 3 + 2] = imData.data[i * 4 + 2]
+
+              auData1[i * 3    ] = imData.data[(i + l) * 4    ]
+              auData1[i * 3 + 1] = imData.data[(i + l) * 4 + 1]
+              auData1[i * 3 + 2] = imData.data[(i + l) * 4 + 2]
+            }
+
+            requestAnimationFrame(draw.bind(null, auData, auData1))
+
+          }
+
+          node.canvas = canvas
+
+          return node
+        }
+        toVideo(audio) {
+          throw new Error('not implemented')
+        }
+      }
+
+
+
+
       const audioCtx = new AudioContext()
-
-      // Connect image input
-      const patch = (a, b) => {
-        const gain = audioCtx.createGain()
-
-        const biquadFilter = audioCtx.createBiquadFilter()
-        biquadFilter.type = "lowpass"
-        biquadFilter.frequency.value = 1000
-        biquadFilter.gain.value = 3
-
-        a.connect(gain)
-        gain.connect(b)
-        // biquadFilter.connect(b)
-
-        new Slider(gain.gain, 0, 1, 'Gain')
-        new Slider(gain.frequency, 0, 10000, 'fr')
-      }
-
-      class Slider{
-        constructor (prop, min, max, label) {
-          this.prop = prop
-
-          const clone = document.importNode(t.content, true)
-          const h2 = clone.querySelector('h2')
-          const input = clone.querySelector('input')
-
-          h2.textContent = label
-          Object.assign(input, {min, max, step: (max-min)/100})
-          input.addEventListener('input', this)
-
-          t.parentNode.appendChild(clone)
-
-        }
-        handleEvent(e) {
-          this.prop.value = parseFloat(e.target.value)
-        }
-      }
+      const bridge = new AVBridge(audioCtx)
 
 
-      const video = document.createElement('video')
-      const cSource = document.createElement('canvas')
-      const cTarget = document.createElement('canvas')
-      const ctxSource = cSource.getContext('2d')
-      const ctxTarget = cTarget.getContext('2d')
 
-      // 64*64 * 4 =  8192 * 2
-      const size = 64
+      const qs = document.querySelector.bind(document)
+      const on = (s, e, fn) => qs(s).addEventListener(e, fn, false)
 
-      // set size and append canvas
-      ![cSource, cTarget].forEach(c =>
-        document.body.appendChild(
-          Object.assign(c, {width: size, height: size})
-        )
-      )
+      on('[href="#camera"]', 'click', (e) => {
+        e.preventDefault()
+        gUM()
+          .then(video => {
+            const node = bridge.toAudio(video)
 
-      async function start() {
+            node.connect(audioCtx.destination)
+
+            // document.body.appendChild(node.canvas)
+
+          })
+
+      })
+
+      let src
+
+      async function gUM() {
+        const video = document.createElement('video')
+        video.autoplay = true
+        video.style.opacity = 0
+        video.style.transition = 'opacity 1s'
+        choose.appendChild(video)
 
         video.srcObject = await navigator.mediaDevices.getUserMedia({
-          audio: false, video: {width: size, height: size}
+          audio: false, video: {width: 90, height: 64}
         })
 
-        video.play()
+        await new Promise(r => video.onloadedmetadata = r)
 
-        function loop() {
-          requestAnimationFrame(loop)
-          ctxSource.drawImage(video, 0, 0 )
-        }
+        video.style.opacity = 1
 
-        loop()
-
-        const source = audioCtx.createScriptProcessor(8192,2,2)
-        const output = audioCtx.createScriptProcessor(8192,2,2)
-
-        source.onaudioprocess = evt => {
-          const imData = ctxSource.getImageData(0,0,size,size)
-
-          const outputBuffer = evt.outputBuffer
-          const auData = outputBuffer.getChannelData(0)
-          const auData1 = outputBuffer.getChannelData(1)
-
-          for (let i = 0; i < auData.length; i++) {
-            auData[i] = imData.data[i]
-            auData1[i] = imData.data[i + auData.length]
-          }
-        }
-
-        output.onaudioprocess = evt => {
-          const imData = ctxTarget.getImageData(0,0,size,size)
-
-          const inputBuffer = evt.inputBuffer
-          const auData = inputBuffer.getChannelData(0)
-          const auData1 = inputBuffer.getChannelData(1)
-
-          for (let i = 0; i < auData.length; i++) {
-            imData.data[i] = auData[i]
-            imData.data[i + auData.length] = auData1[i]
-          }
-
-          ctxTarget.putImageData(imData,0,0)
-        }
-
-        // source.connect(output)
-        patch(source, output)
-
-        output.connect(audioCtx.destination)
-
+        return video
       }
 
-      start()
+
+
+
+      const source = audioCtx.createScriptProcessor(8192,2,2)
+      source.onaudioprocess = evt => {
+        if(!src) {return}
+        const imData = ctxSource.getImageData(0,0,size,size)
+
+        const outputBuffer = evt.outputBuffer
+        const auData = outputBuffer.getChannelData(0)
+        const auData1 = outputBuffer.getChannelData(1)
+
+        for (let i = 0; i < auData.length; i++) {
+          auData[i] = imData.data[i]
+          auData1[i] = imData.data[i + auData.length]
+        }
+      }
+
+
+
     </script>
   </body>
 </html>
