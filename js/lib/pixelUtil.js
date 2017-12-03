@@ -20,6 +20,8 @@ export const intermingle = (stride, vertical) =>
 
 /*
   Convert image data to an array of grayscale pixels (values from Rec. 601)
+
+  TODO - typedArray.from (+ polyfill)
 */
 export const imageDataToGrayscale = data =>
   Array.from({
