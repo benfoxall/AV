@@ -16,3 +16,31 @@ export const intermingle = (stride, vertical) =>
   Array.from({
     length: stride * vertical,
   }, (_, i) => (i % vertical) * stride + Math.floor(i / vertical))
+
+
+/*
+  Convert image data to an array of grayscale pixels (values from Rec. 601)
+*/
+export const imageDataToGrayscale = data =>
+  Array.from({
+    length: data.length / 4
+  }, (_,i) => ~~ (
+      data[i *= 4] * 0.2989 +
+      data[i += 1] * 0.5870 +
+      data[i += 1] * 0.1140
+    )
+  )
+
+/*
+  Write grayscale pixels to imageData.
+
+  This one is a little less functional because typically we'll already have an
+  image data to write to, and it saves up from creating a new array
+*/
+export const grayscaleToImageData = (pixels, data) => {
+  for (var i = 0; i < data.length; i+=4) {
+    const srcIdx = i / 4
+    data[i] = data[i + 1] = data[i + 2] = pixels[srcIdx]
+    data[i + 3] = 255
+  }
+}
