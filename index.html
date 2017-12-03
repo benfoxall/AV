@@ -15,12 +15,14 @@
         box-shadow: rgba(0,0,0,0.1) 0 0 4px;
         border-radius: 4px;
         background: #fff;
-
         padding: 1em;
         width: 50vw;
       }
       .🔈 .scripts {
         padding: 1em;
+      }
+      .🔈 video, .🔈 audio, .🔈 img {
+        max-width: 100%;
       }
     </style>
   </head>
@@ -84,6 +86,14 @@
     <p>Use video as a source of audio</p>
 
 
+    <section class="🔈" data-demo="video">
+      <div>
+        <video src="bunny.webm" controls muted></video>
+        <button>play</button>
+      </div>
+      <input type="range" min="0" max="1" step="0.0001" value="1">
+      <canvas width="1024" height="100"></canvas>
+    </section>
 
 
 

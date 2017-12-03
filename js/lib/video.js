@@ -4,9 +4,9 @@ import {
   imageDataToGrayscale
 } from './pixelUtil.js'
 
-const maths = (audioCtx, element) => {
+const video = (audioCtx, element) => {
 
-  const image = element.querySelector('img')
+  const video = element.querySelector('video')
   const play = element.querySelector('button')
 
   const range = element.querySelector('input')
@@ -47,7 +47,7 @@ const maths = (audioCtx, element) => {
     // 88200 = 210 × 420
     // 88200 x 2 = 420 x 420
 
-    ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, 420, 420)
+    ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 420, 420)
     const id = ctx.getImageData(0,0,420,420)
 
     console.log(id)
@@ -86,4 +86,4 @@ const maths = (audioCtx, element) => {
 }
 
 
-export default maths
+export default video

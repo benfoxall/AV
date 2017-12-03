@@ -21,14 +21,14 @@ export default class Scope {
 
     ctx.clearRect(0, 0, width, height)
 
-    ctx.strokeStyle = '#f08'
+    ctx.strokeStyle = '#ff0043'
     ctx.beginPath()
     frequencies.forEach((value, i) => {
-      ctx.lineTo((i / frequencies.length) * width, (1-(value / 255)) * height)
+      ctx.lineTo((i / frequencies.length) * width, (1-(value / 255)) * height * 0.95)
     })
     ctx.stroke()
 
-    ctx.strokeStyle = '#08f'
+    ctx.strokeStyle = '#3f023f'
     ctx.beginPath()
     waveform.forEach((value, i) => {
       ctx.lineTo((i / waveform.length) * width, (value / 255) * height)
