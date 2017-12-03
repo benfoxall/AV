@@ -3,14 +3,19 @@
   <head>
     <meta charset="utf-8">
     <title>AV</title>
-
+    <link href="https://fonts.googleapis.com/css?family=Source+Serif+Pro" rel="stylesheet">
     <style media="screen">
-      body {font-family: sans-serif;}
+      body {font-family: Source Serif Pro,serif;
+        background-color: #fdf7f7; color: #3f3f46}
 
       .🔈 {
         display: flex;
         flex-direction: column;
-        border: 1px solid #ccc;
+        border: 1px solid rgba(0,0,0,0.15);
+        box-shadow: rgba(0,0,0,0.1) 0 0 4px;
+        border-radius: 4px;
+        background: #fff;
+
         padding: 1em;
         width: 50vw;
       }
@@ -66,7 +71,7 @@
 
     <section class="🔈" data-demo="imagedata">
       <div>
-        <img src="flowers.jpg" alt="">
+        <img src="tartan.jpg" alt="">
         <button>play</button>
       </div>
       <input type="range" min="0" max="1" step="0.0001" value="1">
