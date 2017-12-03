@@ -1,4 +1,8 @@
-import {intermingle, imageDataToGrayscale, grayscaleToImageData} from '../js/lib/pixelMap.js'
+import {
+  intermingle,
+  imageDataToGrayscale,
+  grayscaleToImageData
+} from '../js/lib/pixelUtil.js'
 
 const {expect} = chai
 
