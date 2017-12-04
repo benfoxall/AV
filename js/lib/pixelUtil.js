@@ -23,6 +23,12 @@ export const interleaveMap = (length, n) =>
     length: length
   }, (_, i) => ((i % n) * length / n) + ~~(i / 2))
 
+export const invertMap = arr => {
+  const out = new Array(arr.length)
+  arr.forEach((v, i) => out[v] = i)
+  return out
+}
+
 
 /*
   Convert image data to an array of grayscale pixels (values from Rec. 601)

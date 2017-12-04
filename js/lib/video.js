@@ -1,7 +1,9 @@
 import Scope from './Scope.js'
 
 import {
-  imageDataToGrayscale
+  imageDataToGrayscale,
+  interleaveMap,
+  grayscaleToImageData
 } from './pixelUtil.js'
 
 const video = (audioCtx, element) => {
@@ -38,6 +40,7 @@ const video = (audioCtx, element) => {
   play.addEventListener('click', () => {
 
     const canvas = document.createElement('canvas')
+
     canvas.width = canvas.height = 420
 
     const ctx = canvas.getContext('2d')
@@ -46,6 +49,16 @@ const video = (audioCtx, element) => {
 
     // 88200 = 210 × 420
     // 88200 x 2 = 420 x 420
+
+    const mapping = interleaveMap(420 * 420, 2)
+
+    const inv = new Array(mapping.length)
+
+    for (var i = 0; i < mapping.length; i++) {
+      inv[mapping[i]] = i
+    }
+
+    console.log(mapping)
 
     ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 420, 420)
     const id = ctx.getImageData(0,0,420,420)
@@ -57,17 +70,21 @@ const video = (audioCtx, element) => {
     console.log(grayscale)
 
 
+    // grayscaleToImageData(grayscale, id.data)
+    // ctx.putImageData(id, 0,0)
+    // document.body.appendChild(canvas)
+
 
     const audioBuffer = audioCtx.createBuffer(2, audioCtx.sampleRate * 2, audioCtx.sampleRate)
 
     let data = audioBuffer.getChannelData(0)
     for (var i = 0; i < data.length; i++) {
-      data[i] = grayscale[i] / 255
+      data[i] = grayscale[inv[i]] / 255
     }
 
     data = audioBuffer.getChannelData(1)
     for (var i = 0; i < data.length; i++) {
-      data[i] = grayscale[i + data.length] / 255
+      data[i] = grayscale[inv[i + data.length]] / 255
     }
 
 
