@@ -3,8 +3,9 @@ import analyser from './lib/analyser.js'
 import maths from './lib/maths.js'
 import imagedata from './lib/imagedata.js'
 import video from './lib/video.js'
+import videoDisplay from './lib/videoDisplay.js'
 
-const demos = { basic, analyser, maths, imagedata, video }
+const demos = { basic, analyser, maths, imagedata, video, videoDisplay }
 
 const audioCtx = new AudioContext()
 

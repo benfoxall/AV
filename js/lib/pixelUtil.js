@@ -51,9 +51,9 @@ export const imageDataToGrayscale = data =>
   This one is a little less functional because typically we'll already have an
   image data to write to, and it saves up from creating a new array
 */
-export const grayscaleToImageData = (pixels, data) => {
+export const grayscaleToImageData = (pixels, data, offset = 0) => {
   for (var i = 0; i < data.length; i+=4) {
-    const srcIdx = i / 4
+    const srcIdx = (i / 4)
     data[i] = data[i + 1] = data[i + 2] = pixels[srcIdx]
     data[i + 3] = 255
   }
