@@ -18,6 +18,12 @@ export const intermingle = (stride, vertical) =>
   }, (_, i) => (i % vertical) * stride + Math.floor(i / vertical))
 
 
+export const interleaveMap = (length, n) =>
+  Array.from({
+    length: length
+  }, (_, i) => ((i % n) * length / n) + ~~(i / 2))
+
+
 /*
   Convert image data to an array of grayscale pixels (values from Rec. 601)
 

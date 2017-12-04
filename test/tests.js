@@ -1,7 +1,8 @@
 import {
   intermingle,
   imageDataToGrayscale,
-  grayscaleToImageData
+  grayscaleToImageData,
+  interleaveMap
 } from '../js/lib/pixelUtil.js'
 
 const {expect} = chai
@@ -33,6 +34,23 @@ describe('intermingle', () => {
     expect(result).to.eql(expected)
   })
 
+})
+
+describe('interleaving', () => {
+
+  it('is a function', () => {
+    expect(typeof interleaveMap).to.equal('function')
+  })
+
+  it('creates a map for interleaving imageData', () => {
+    expect(interleaveMap(4, 2))
+      .to.eql([0, 2, 1, 3])
+  })
+
+  it('works with other inputs', () => {
+    expect(interleaveMap(12, 3))
+      .to.eql([0, 4, 9, 1, 6, 10, 3, 7, 12, 4, 9, 13])
+  })
 })
 
 
