@@ -2,34 +2,36 @@
 
 In 2004, I was given an iPod.
 
-I count this as one of the most intuitive bits of technology I've ever owned.  It wasn't because of the the snazzy (colour!) menus or circular touchpad.  I loved how smoothly it fitted into my life.
-
-I could plug in my headphones, and listen to music while I was out and about.  Then when I got home, I could plug it into my amplifier, and carry on listening there.
+I count this as one of the most intuitive bits of technology I've ever owned.  It wasn't because of the the snazzy (colour!) menus or circular touchpad.  I loved how smoothly it fitted into my life. I could plug in my headphones, and listen to music while I was out and about.  Then when I got home, I could plug it into my amplifier, and carry on listening there.
 
 There was no faff.  It didn't matter if I could find my favourite mix tape, or if my wifi was flakey - it was all just there.
 
-Nowadays, when I'm trying to pair my phone with some bluetooth speakers, or can't find my usb-to-headphone jack, or can't open my audio app because I don't have cellular reception; I feel like I've taken a step back.
+Nowadays, when I'm trying to pair my phone with some bluetooth speakers, or can't find my usb-to-headphone jack, or can't access my music because I don't have cellular reception; I feel like I've taken a step back.
 
 ### The Web Audio API
 
-In a tenuous (but also, yeah totally) jump, I think the Web Audio API feels kind of like my iPod did.
+I think the Web Audio API feels kind of like how my iPod did.
 
-The Web Audio API feels different from other browser APIs.  Rather than throwing around data, or updating dom elements, you construct a network of audio nodes, which the browser can use to generate/process/play sounds.
+The Web Audio API looks different from other browser APIs.  Rather than throwing around data, or updating dom elements, you build a network of audio nodes, which the browser can use to generate/process/play sounds.
 
-So, let's go ahead and use it.  First of all, we'll need some audio input.  A pretty good way of doing this is to use the <audio> element.
+Let's take a look at it.  First of all, we want to get some music to play.  We can do this by creating an `<audio>` element.
 
 ```html
-<audio controls id="in"><source blah /></audio>
+<audio controls><source blah /></audio>
 ```
 
 [[ audio element ]]
+
+Great! This works but it's playing directly through the browser rather than through using any the Web Audio API.
+
+We can plug this element into our audio graph by using an `AudioSourceNode`.  This will capture the output from that element, and allow us to route it into whatever
 
 This is cool, but it's playing **directly through the browser**; where we want to be able to control the audio through the Web Audio api. So the first thing we want to do is wire this into an audio graph.
 
 We can do this by creating an AudioSourceNode - this wraps the output of the element, and allows us to feed the audio into a an audio graph.
 
 ```js
-input = audioCtx.create…
+input = audioCtx.createAudioSourceNode(document.querySelector('audio'))
 input.connect(audioCtx.destination)
 ```
 
