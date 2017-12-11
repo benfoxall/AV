@@ -6,8 +6,8 @@
     <defs></defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="graph-simple">
-            <circle id="Oval" stroke="#3F3F46" stroke-linecap="square" cx="62" cy="108" r="47"></circle>
-            <circle id="Oval" stroke="#3F3F46" stroke-linecap="square" cx="212" cy="108" r="47"></circle>
+            <circle id="Oval" stroke="#3F3F46" stroke-linecap="square" cx="62" cy="110" r="20"></circle>
+            <circle id="Oval" stroke="#3F3F46" stroke-linecap="square" cx="212" cy="110" r="20"></circle>
             <text id="Destination" font-family="SourceSerifPro-Regular, Source Serif Pro" font-size="14" font-weight="normal" fill="#3F3F46">
                 <tspan x="175.775" y="184">Destination</tspan>
             </text>
