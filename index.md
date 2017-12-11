@@ -21,8 +21,12 @@ Let's take a look at it.  First of all, we want to get some music to play.  We c
 ```
 
 <section class="🔈">
-  <audio src="40724.ogg" controls></audio>
+  <audio src="night-owl.mp3" controls></audio>
 </section>
+
+Song: [Night Owl by Broke For Free][night_owl]
+
+[night_owl]: http://freemusicarchive.org/music/Broke_For_Free/Directionless_EP/Broke_For_Free_-_Directionless_EP_-_01_Night_Owl
 
 Great! This works but it's playing directly through the browser rather than through using any the Web Audio API.
 
@@ -38,12 +42,14 @@ input.connect(audioCtx.destination)
 ```
 
 <section class="🔈" data-demo="basic">
-  <audio src="40724.ogg" controls></audio>
+  <audio src="night-owl.mp3" controls></audio>
 </section>
 
 Cool.  This looks & sounds exactly the same as before, though the difference is that it's running through the web audio api.
 
 Now we can add some audio nodes to this graph and start doing some interesting stuff with it.
+
+![Basic audio graph](images/graph-simple.svg)
 
 ## Gain
 
@@ -51,7 +57,7 @@ First, we'll plug in a gain node - this allows you to alter the volume of an an 
 
 
 ```js
-// <input type="number" min=0 max=1 step=0.1 id="volume" />
+// <input type="number" min=0 max=1 step=0.01 id="volume" />
 
 gain = audioCtx.createGain()
 
@@ -63,8 +69,8 @@ gain.connect(audioCtx.destination)
 ```
 
 <section class="🔈" data-demo="gain">
-  <audio src="40724.ogg" controls></audio>
-  <input type="range" min=0 max=1 step=0.1 />
+  <audio src="night-owl.mp3" controls></audio>
+  <input type="range" min=0 max=1 step=0.01 />
 </section>
 
 You'll be able to see now that you can change the value of the input field, and the amplitude of the audio changes.
@@ -75,7 +81,8 @@ https://uxdesign.cc/the-worst-volume-control-ui-in-the-world-60713dc86950
 
 So, now - our graph looks like this:
 
-(audio) -> (gain) -> (output)
+![(audio) -> (gain) -> (output)](images/graph-gain.svg)
+
 
 
 ## Analysers
@@ -92,7 +99,8 @@ analyser.connect(gain)
 gain.connect(audioCtx.destination)
 ```
 
-(audio) -> (analyser) -> (gain) -> (output)
+
+![(audio) -> (analyser) -> (gain) -> (output)](images/graph-gain.svg)
 
 Now, from elsewhere in our code, we can request data from the analyser node, and we'll get back an array that we can display in any way that we want.
 
@@ -125,8 +133,8 @@ ctx.stroke()
 ```
 
 <section class="🔈" data-demo="analyser">
-  <audio src="40724.ogg" controls></audio>
-  <input type="range" min=0 max=1 step=0.1 />
+  <audio src="night-owl.mp3" controls></audio>
+  <input type="range" min=0 max=1 step=0.01 />
   <canvas width="700" height="300"></canvas>
   <!-- <div>
     <button>440hz</button>
@@ -184,7 +192,13 @@ Now we can write a function, that takes time, and maps it to a sample which we c
 const noise = sound(0.5, t => Math.random() * 0.2)
 ```
 
-[[ button canvas ]]
+<section class="🔈" data-demo="buttonNoise">
+  <div>
+    <button>Noise</button>
+  </div>
+  <input type="range" min=0 max=1 step=0.01 />
+  <canvas width="700" height="300"></canvas>
+</section>
 
 Now, when we click that button, we'll hear a random noise from our speaker.  Very handy!
 
@@ -204,7 +218,14 @@ const _440hz = sound(0.5, t => sin(t * 440))
 const _880hz = sound(0.5, t => sin(t * 880))
 ```
 
-[[ 440, 880 ]]
+<section class="🔈" data-demo="buttonHz">
+  <div>
+    <button data-hz="440">440Hz</button>
+    <button data-hz="880">880Hz</button>
+  </div>
+  <input type="range" min=0 max=1 step=0.01 />
+  <canvas width="700" height="300"></canvas>
+</section>
 
 Since we're now expressing sounds as simple functions, we can start introducing higher order logic to implement new sounds & effects.
 
@@ -218,7 +239,15 @@ const harmony = f => [4, 3, 2, 1].reduce(
 const a440 = sound(0.5, harmony(440))
 ```
 
-[a440 (harmonize)]
+<section class="🔈" data-demo="buttonHarmony">
+  <div>
+    <button data-hz="440">440Hz</button>
+    <button data-hz="880">880Hz</button>
+  </div>
+  <input type="range" min=0 max=1 step=0.01 />
+  <canvas width="700" height="300"></canvas>
+</section>
+
 
 And because we're not using any audio-specific functionality here, we can repurpose anything that does an operation on data.
 
@@ -233,7 +262,19 @@ const a440 = sound(0.5, (t, s) =>
 ```
 
 
+<section class="🔈" data-demo="buttonADSR">
+  <div>
+    <button data-hz="440">440Hz</button>
+    <button data-hz="880">880Hz</button>
+  </div>
+  <input type="range" min=0 max=1 step=0.01 />
+  <canvas width="700" height="300"></canvas>
+</section>
+
+
 … Go and experiment yourself
+
+https://jsbin.com/tawenuh/edit?js,output
 
 ### (A departure from best practice)
 
@@ -245,13 +286,24 @@ Which will totally be more performant (because it's not happening on the main th
 
 But we're going to stay with this approach because it's fun, and sometimes the fun thing to do might not technically be the best.
 
+* todo - 'from scratch'
+
 ### Making a keyboard
 
 Having a button that makes a sound is totally great, but how about lots of buttons that make lots of sounds?  Yup, totally way-greater-er.
 
 Because I'm pretty terrible at CSS, I've drawn an SVG image of a keyboard below:
 
-[ keyboard ]
+
+<section class="🔈" data-demo="keyboard">
+  <svg width="600" height="250" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><rect class="key" fill="#FFF" x="33" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="71.538" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="110.077" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="148.615" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="187.154" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="225.692" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="264.231" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="302.769" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="341.308" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="379.846" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="418.385" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="456.923" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="495.462" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="534" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#383838" x="60" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="99" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="176" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="214" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="253" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="330" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="368" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="445" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="484" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="522" y="59" width="20" height="65" rx="4"/></g></svg>
+
+  <canvas width="700" height="300"></canvas>
+  <style>
+    rect {stroke: #ddd;}
+    rect:hover {opacity: 0.8; stroke: #000}
+  </style>
+</section>
 
 We can map the elements of this image, to different notes that we've generated.  All we have to do is work out what frequency each of the notes should be.
 
@@ -274,7 +326,7 @@ Array.from(svg.querySelector('rect'))
 ```
 
 
-And, violla. Our keyboard works:
+And, voilà. Our keyboard works:
 
 [working keyboard]
 
