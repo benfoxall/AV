@@ -85,3 +85,26 @@ export const buttonHarmony = (audioCtx, element) => {
   buttons[1].addEventListener('click', _880hz)
 
 }
+
+
+const adsr = d3.scaleLinear()
+    .domain([0, 0.2, 0.3, 0.4, 0.5])
+    .range( [0, 1,   .3, .3,  0])
+
+
+export const buttonADSR = (audioCtx, element) => {
+
+ const sound = setup(audioCtx, element)
+
+ const buttons = element.querySelectorAll('button')
+
+ const h440 = harmony(440)
+ const h880 = harmony(880)
+
+ const _440hz = sound(.5, t => adsr(t) * h440(t) )
+ const _880hz = sound(.5, t => adsr(t) * h880(t) )
+
+ buttons[0].addEventListener('click', _440hz)
+ buttons[1].addEventListener('click', _880hz)
+
+}

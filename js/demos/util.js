@@ -14,7 +14,6 @@ export const generator = (audioCtx, target) => (seconds, fn) => {
     const source = audioCtx.createBufferSource()
     source.buffer = buffer
 
-    console.log('connect', target)
     source.connect(target || audioCtx.destination)
     source.start()
   }

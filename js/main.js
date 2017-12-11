@@ -7,6 +7,9 @@ import { basic } from './demos/basic.js'
 import { buttonNoise } from './demos/buttons.js'
 import { buttonHz } from './demos/buttons.js'
 import { buttonHarmony } from './demos/buttons.js'
+import { buttonADSR } from './demos/buttons.js'
+
+import { keyboard } from './demos/keyboard.js'
 
 const demos = {
   analyser,
@@ -15,7 +18,10 @@ const demos = {
 
   buttonNoise,
   buttonHz,
-  buttonHarmony
+  buttonHarmony,
+  buttonADSR,
+
+  keyboard
 }
 
 const audioCtx = new AudioContext()
