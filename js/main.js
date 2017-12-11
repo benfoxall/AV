@@ -2,8 +2,10 @@ import './css.js'
 
 import { analyser } from './demos/analyser.js'
 import { buttons } from './demos/buttons.js'
+import { gain } from './demos/gain.js'
+import { basic } from './demos/basic.js'
 
-const demos = { analyser, buttons }
+const demos = { analyser, buttons, gain, basic }
 
 const audioCtx = new AudioContext()
 
