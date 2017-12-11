@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Feeding the audio graph</title>
+    <link href="https://fonts.googleapis.com/css?family=Source+Serif+Pro" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+    <link href="https://cdn.rawgit.com/24ways/frontend/master/src/components/scopes/syntax/syntax.css" rel="stylesheet" />
+    <style media="screen">
+      :root {
+        --color-year: hsl(300, 100%, 16%);
+        --color-year--dark: hsl(300, 100%, 8%);
+        --color-year--dark-alpha: hsla(300, 100%, 8%, 0.8);
+              --color-day: hsl(304, 80%, 60%);
+        --color-day--light: hsl(304, 60%, 98%);
+        --color-day--dark: hsl(304, 100%, 24%);
+        --color-day--dark-alpha: hsla(304, 100%, 24%, 0.33);
+      }
+
+      h1, h2, h3, h4 {
+        font-family: Source Sans Pro,serif;
+        color: var(--color-day--dark,#7a0000)
+      }
+
+      body {font-family: Source Serif Pro,serif;
+        background-color: var(--color-day--light); color: #3f3f46; max-width: 700px; margin-bottom: 10em; padding: 2em;font-size: 1.2em;
+
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.5;
+
+      }
+
+      pre {
+        font-family: Source Sans Pro,serif;
+        background: hsla(0,0%,100%,.5); padding: 1em;
+      }
+
+      /* in css.js */
+      /*.🔈 {
+        background: hsla(0,0%,100%,.5);
+        border: 1px solid hsla(0, 0%, 0%, 0.09);
+        padding: 1em;
+        display: flex;
+      }
+      .🔈 input {
+        flex:1
+      }
+
+      .🔈 button {
+        border: 1px solid #3f3f46;
+        padding: .2em;
+      }*/
+    </style>
+  </head>
+  <body>
+
+    <h1>Feeding the audio graph</h1>
+
+    <p>In 2004, I was given an iPod.</p>
+
+    <p>I count this as one of the most intuitive bits of technology I've ever owned.  It wasn't because of the the snazzy (colour!) menus or circular touchpad.  I loved how smoothly it fitted into my life. I could plug in my headphones, and listen to music while I was out and about.  Then when I got home, I could plug it into my amplifier, and carry on listening there.</p>
+
+    <p>There was no faff.  It didn't matter if I could find my favourite mix tape, or if my wifi was flakey - it was all just there.</p>
+
+    <p>Nowadays, when I'm trying to pair my phone with some bluetooth speakers, or can't find my usb-to-headphone jack, or can't access my music because I don't have cellular reception; I feel like I've taken a step back.</p>
+
+    <h2>The Web Audio API</h2>
+
+    <p>I think the Web Audio API feels kind of like how my iPod did.</p>
+
+    <p>The Web Audio API looks different from other browser APIs.  Rather than throwing around data, or updating dom elements, you build a network of audio nodes, which the browser can use to generate/process/play sounds.</p>
+
+    <p>Let's take a look at it.  First of all, we want to get some music to play.  We can do this by creating an <code>&lt;audio&gt;</code> element.</p>
+
+    <pre><code class="language-html">&lt;audio controls&gt;&lt;source blah /&gt;&lt;/audio&gt;</code></pre>
+
+    <p>Which will display something like this:</p>
+
+    <section class="🔈">
+      <audio src="40724.ogg" controls></audio>
+    </section>
+
+    <p>Cool! Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+
+    <pre><code class="language-js">input = audioCtx.createAudioSourceNode(document.querySelector('audio'))
+input.connect(audioCtx.destination)</code></pre>
+
+    <section class="🔈">
+      <audio src="40724.ogg" controls></audio>
+    </section>
+
+    <img src="images/graph-simple.svg" alt="" />
+
+    <h2>Gain</h2>
+
+    First, we'll plug in a gain node - this allows you to alter the volume of an an audio stream.
+
+    <pre><code class="language-js">
+gain = audioCtx.createGain()
+
+input.connect(gain)
+gain.connect(audioCtx.destination)
+
+// Connect to UI
+volume.value = gain.gain.value
+volume.oninput = () => gain.gain.value = parseFloat(volume.value)
+</code></pre>
+
+    <section class="🔈">
+      <audio src="40724.ogg" controls></audio>
+      <input type="range" min=0 max=1 step=0.1 />
+    </section>
+
+
+    <p>You'll be able to see now that you can change the value of the input field, and the amplitude of the audio changes.</p>
+
+    <p>You can now hook this to <a href="https://uxdesign.cc/the-worst-volume-control-ui-in-the-world-60713dc86950">any kind of interface</a> that you want.</p>
+
+    So, now - our graph looks like this:
+
+    <img src="images/graph-gain.svg" alt="" />
+
+
+    <h2>Analysers</h2>
+
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+    <pre><code class="language-js">
+const waveform = new Uint8Array(analyser.fftSize)
+const frequencies = new Uint8Array(analyser.frequencyBinCount)
+
+const loop = () => {
+    requestAnimationFrame(loop)
+    analyser.getByteTimeDomainData(waveform)
+    analyser.getByteFrequencyData(frequencies)
+
+    // draw anything we want
+}
+loop()
+</code></pre>
+
+
+    <section class="🔈" data-demo="analyser">
+      <audio src="40724.ogg" controls></audio>
+      <input type="range" min=0 max=1 step=0.1 />
+      <canvas width="700" height="300"></canvas>
+      <!-- <div>
+        <button>440hz</button>
+      </div> -->
+    </section>
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+
+    <section class="🔈" data-demo="buttons">
+      <div>
+        <button>440hz</button>
+      </div>
+      <input type="range" min=0 max=1 step=0.1 />
+      <canvas width="700" height="300"></canvas>
+    </section>
+
+
+    <script type="module" src="js/main.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/prism.js"></script>
+  </body>
+</html>
