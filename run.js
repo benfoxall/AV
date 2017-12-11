@@ -76,5 +76,5 @@ generate()
 watch(source, generate)
 
 liveServer.start({
-  ignore: source
+  ignore: 'index.md,.git'
 })
