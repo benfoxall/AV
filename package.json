@@ -16,6 +16,6 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "prepush": "rollup -c && git commit -m 'build' js/main.build.js"
+    "prepush": "rollup -c && git add js/main.build.js"
   }
 }
