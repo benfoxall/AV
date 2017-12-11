@@ -1,4 +1,4 @@
-import Scope from './Scope.js'
+import {Scope} from './util.js'
 
 export const buttons = (audioCtx, element) => {
 

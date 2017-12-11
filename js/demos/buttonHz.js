@@ -1,20 +1,19 @@
-import {Scope} from './util.js'
+import {generator, Scope} from './util.js'
 
-export const analyser = (audioCtx, element) => {
+export const buttonHz = (audioCtx, element) => {
 
-  const media = element.querySelector('audio')
+  const buttons = element.querySelectorAll('button')
+
   const range = element.querySelector('input')
   const canvas = element.querySelector('canvas')
 
-
-  const source = audioCtx.createMediaElementSource(media)
   const gain = audioCtx.createGain()
   const analyser = audioCtx.createAnalyser()
 
-  // create the audio graph
-  source.connect(gain)
+
   gain.connect(analyser)
   analyser.connect(audioCtx.destination)
+
 
   // connect gain
   range.addEventListener('input', () =>
@@ -30,5 +29,18 @@ export const analyser = (audioCtx, element) => {
   }
 
   animate()
+
+
+  const sound = generator(audioCtx, gain)
+
+  // Math.sin with period of 0..1
+  const sin = v => Math.sin(Math.PI * 2 * v)
+
+  const _440hz = sound(0.5, t => sin(t * 440))
+  const _880hz = sound(0.5, t => sin(t * 880))
+
+  buttons[0].addEventListener('click', _440hz)
+  buttons[1].addEventListener('click', _880hz)
+
 
 }

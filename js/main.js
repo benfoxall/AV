@@ -5,7 +5,10 @@ import { buttons } from './demos/buttons.js'
 import { gain } from './demos/gain.js'
 import { basic } from './demos/basic.js'
 
-const demos = { analyser, buttons, gain, basic }
+import { buttonNoise } from './demos/buttonNoise.js'
+import { buttonHz } from './demos/buttonHz.js'
+
+const demos = { analyser, buttons, gain, basic, buttonNoise, buttonHz }
 
 const audioCtx = new AudioContext()
 
