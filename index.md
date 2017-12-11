@@ -1,4 +1,4 @@
-## Feeding the audio graph
+# Feeding the audio graph
 
 In 2004, I was given an iPod.
 
@@ -20,7 +20,9 @@ Let's take a look at it.  First of all, we want to get some music to play.  We c
 <audio controls><source blah /></audio>
 ```
 
-[[ audio element ]]
+<section class="🔈">
+  <audio src="40724.ogg" controls></audio>
+</section>
 
 Great! This works but it's playing directly through the browser rather than through using any the Web Audio API.
 
@@ -35,7 +37,9 @@ input = audioCtx.createAudioSourceNode(document.querySelector('audio'))
 input.connect(audioCtx.destination)
 ```
 
-[[ audio element ]]
+<section class="🔈" data-demo="basic">
+  <audio src="40724.ogg" controls></audio>
+</section>
 
 Cool.  This looks & sounds exactly the same as before, though the difference is that it's running through the web audio api.
 
@@ -58,7 +62,10 @@ input.connect(gain)
 gain.connect(audioCtx.destination)
 ```
 
-[[ audio, input ]]
+<section class="🔈" data-demo="gain">
+  <audio src="40724.ogg" controls></audio>
+  <input type="range" min=0 max=1 step=0.1 />
+</section>
 
 You'll be able to see now that you can change the value of the input field, and the amplitude of the audio changes.
 
@@ -107,7 +114,7 @@ The nice thing about this is that we're not tied to any functionality of the aud
 
 For example, if we wanted to draw this data to a canvas, we could do it with the following code:
 
-```
+```js
 ctx.beginPath()
 waveform.forEach((f, i) => ctx.lineTo(i, f))
 ctx.stroke()
@@ -116,6 +123,15 @@ ctx.beginPath()
 frequencies.forEach((f, i) => ctx.lineTo(i, 255-f))
 ctx.stroke()
 ```
+
+<section class="🔈" data-demo="analyser">
+  <audio src="40724.ogg" controls></audio>
+  <input type="range" min=0 max=1 step=0.1 />
+  <canvas width="700" height="300"></canvas>
+  <!-- <div>
+    <button>440hz</button>
+  </div> -->
+</section>
 
 [[audio, input, canvas]]
 
