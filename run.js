@@ -58,9 +58,13 @@ const htm = `<!DOCTYPE html>
 
     ${body}
 
-    <script defer src="https://d3js.org/d3.v4.min.js"></script>
-    <script type="module" src="js/main.js"></script>
 
+    <script type="text/javascript">
+      (function(a,c){var b=a.createElement("script");if(!("noModule"in b)&&"on"+c in b){var d=!1;a.addEventListener(c,function(a){if(a.target===b)d=!0;else if(!a.target.hasAttribute("nomodule")||!d)return;a.preventDefault()},!0);b.type="module";b.src=".";a.head.appendChild(b);b.remove()}})(document,"beforeload");
+    </script>
+    <script defer src="https://d3js.org/d3.v4.min.js"></script>
+    <script defer nomodule src="js/main.build.js"></script>
+    <script type="module" src="js/main.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/prism.js"></script>
   </body>
@@ -78,5 +82,5 @@ watch(source, generate)
 
 
 liveServer.start({
-  ignore: __dirname + '/index.md'
+  ignore: __dirname + '/index.md,' + __dirname + '/js/main.build.js'
 })

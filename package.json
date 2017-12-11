@@ -9,6 +9,13 @@
     "d3-interpolate": "^1.1.6",
     "live-server": "^1.2.0",
     "marked": "^0.3.7",
-    "node-watch": "^0.5.5"
+    "node-watch": "^0.5.5",
+    "rollup": "^0.52.1",
+    "rollup-plugin-buble": "^0.18.0"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "prepush": "rollup -c && git commit -m 'build' js/main.build.js"
   }
 }

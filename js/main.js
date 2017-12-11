@@ -24,7 +24,8 @@ const demos = {
   keyboard
 }
 
-const audioCtx = new AudioContext()
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
 
 // run scripts on each section
 Array.from(document.querySelectorAll('.🔈[data-demo]'))
