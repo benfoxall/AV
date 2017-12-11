@@ -1,0 +1,12 @@
+{
+  "name": "AV",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:benfoxall/AV.git",
+  "author": "Ben Foxall <benfoxall@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "marked": "^0.3.7",
+    "node-watch": "^0.5.5"
+  }
+}
