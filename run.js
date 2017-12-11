@@ -58,6 +58,7 @@ const htm = `<!DOCTYPE html>
 
     ${body}
 
+    <script defer src="https://d3js.org/d3.v4.min.js"></script>
     <script type="module" src="js/main.js"></script>
 
 
