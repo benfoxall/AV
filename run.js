@@ -76,6 +76,7 @@ console.log(`Wrote to ${dest}`)
 generate()
 watch(source, generate)
 
+
 liveServer.start({
-  ignore: 'index.md,.git'
+  ignore: __dirname + '/index.md'
 })
