@@ -1,4 +1,5 @@
 import './css.js'
+import './polyfills.js'
 
 import { analyser } from './demos/analyser.js'
 import { gain } from './demos/gain.js'

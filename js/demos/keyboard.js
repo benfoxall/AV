@@ -31,22 +31,18 @@ export const keyboard = (audioCtx, element) => {
     (sin(f * t * 7) / 7))
     * 0.2 * sin(t * 2)
 
+  const preventDefault = fn => e => {
+    e.preventDefault()
+    fn(e)
+  }
 
   Array.from(element.querySelectorAll('svg rect'))
     .sort((a, b) =>
       parseFloat(a.getAttribute('x')) - parseFloat(b.getAttribute('x'))
     )
-
     .forEach((key, i) => {
-
-      const s = sound(0.25, harmony(freq(i + 50)))
-
-      key.addEventListener('mouseenter', () => {
-        console.log(i)
-        s()
-      })
-
-
+      const s = sound(0.25, harmony(freq(i + 48)))
+      key.addEventListener('pointerenter', s)
     })
 
 }
