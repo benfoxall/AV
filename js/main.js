@@ -1,6 +1,8 @@
 import './css.js'
 import './polyfills.js'
 
+import BaseDemo from './demos/Base.js'
+
 import { analyser } from './demos/analyser.js'
 import { gain } from './demos/gain.js'
 import { basic } from './demos/basic.js'
@@ -28,6 +30,16 @@ const demos = {
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
 
+
+const targets = new Map()
+
+var observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if(targets.has(entry.target))
+      targets.get(entry.target)(entry)
+  })
+})
+
 // run scripts on each section
 Array.from(document.querySelectorAll('.🔈[data-demo]'))
   .forEach(section => {
@@ -37,6 +49,18 @@ Array.from(document.querySelectorAll('.🔈[data-demo]'))
 
     if(!demo) return console.warn(`Demo not found: "${name}"`)
 
-    demo(audioCtx, section)
+    if(demo.prototype instanceof BaseDemo) {
+      const _demo = new demo(audioCtx, section)
+
+      // set up targets
+      targets.set(section, (e) => {
+        _demo.handleObservation(e)
+        console.log(name, e.isIntersecting)
+      })
+
+      observer.observe(section)
+    } else {
+      demo(audioCtx, section)
+    }
 
   })

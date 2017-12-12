@@ -344,14 +344,14 @@ There's also some new challenges with immersive WebXR experiences, where spatial
 
 And that's about it.
 
+Web Audio isn't some black box, you can easily link it with whatever framework, or UI that you've built (whether you should, is an entirely different question).
+
 If anyone ever asks you "could you turn this SVG into a musical instrument" you don't have to stare blankly at them anymore.
 
 If you're interested in the web audio api, there's heaps of information on MDN. There's also some interesting features coming up in the future (AudioWorklets look pretty cool).
 
 
 https://webaudio.github.io/web-audio-api/#AudioWorklet
-
-
 
 
 

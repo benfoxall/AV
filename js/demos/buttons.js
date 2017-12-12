@@ -1,4 +1,49 @@
 import {generator, Scope} from './util.js'
+import Demo from './Base.js'
+
+
+const __setup = (demo) => {
+
+  const {element, audioCtx} = demo
+
+  const range = element.querySelector('input')
+  const canvas = element.querySelector('canvas')
+
+  const gain = audioCtx.createGain()
+  const analyser = audioCtx.createAnalyser()
+
+
+  gain.connect(analyser)
+  analyser.connect(audioCtx.destination)
+
+
+  // connect gain
+  range.addEventListener('input', () =>
+    gain.gain.value = parseFloat(range.value)
+  )
+
+  // draw to canvas
+  const scope = new Scope(analyser, canvas)
+  const animate = () => {
+    demo.raf = requestAnimationFrame(animate)
+    scope.render()
+  }
+
+  animate()
+
+
+  const sound = generator(audioCtx, gain)
+
+  demo.pause = () => {
+    cancelAnimationFrame(demo.raf)
+  }
+  demo.resume = () => {
+    animate()
+  }
+
+  Object.assign(demo, { sound })
+
+}
 
 
 const setup = (audioCtx, element) => {
@@ -22,7 +67,7 @@ const setup = (audioCtx, element) => {
   // draw to canvas
   const scope = new Scope(analyser, canvas)
   const animate = () => {
-    requestAnimationFrame(animate)
+    this.raf = requestAnimationFrame(animate)
     scope.render()
   }
 
@@ -43,68 +88,86 @@ const harmony = f => t =>
   (sin(f * t * 7) / 7)
 
 
-export const buttonNoise = (audioCtx, element) => {
+export class buttonNoise extends Demo {
 
-  const sound = setup(audioCtx, element)
+  start(audioCtx, element) {
+    __setup(this)
 
-  const buttons = element.querySelectorAll('button')
+    const sound = this.sound
 
-  const noise = sound(0.5, t => Math.random() * 0.2)
+    const buttons = element.querySelectorAll('button')
 
-  buttons[0].addEventListener('click', noise)
+    const noise = sound(0.5, t => Math.random() * 0.2)
+
+    buttons[0].addEventListener('click', noise)
+
+  }
 }
 
 
 
-export const buttonHz = (audioCtx, element) => {
+export class buttonHz extends Demo {
 
-  const sound = setup(audioCtx, element)
+  start(audioCtx, element) {
+    __setup(this)
 
-  const buttons = element.querySelectorAll('button')
+    const sound = this.sound
 
-  const _440hz = sound(0.5, t => sin(t * 440))
-  const _880hz = sound(0.5, t => sin(t * 880))
+    const buttons = element.querySelectorAll('button')
 
-  buttons[0].addEventListener('click', _440hz)
-  buttons[1].addEventListener('click', _880hz)
+    const _440hz = sound(0.5, t => sin(t * 440))
+    const _880hz = sound(0.5, t => sin(t * 880))
 
+    buttons[0].addEventListener('click', _440hz)
+    buttons[1].addEventListener('click', _880hz)
 
-}
-
-
-export const buttonHarmony = (audioCtx, element) => {
-
-  const sound = setup(audioCtx, element)
-
-  const buttons = element.querySelectorAll('button')
-
-  const _440hz = sound(0.5, harmony(440))
-  const _880hz = sound(0.5, harmony(880))
-
-  buttons[0].addEventListener('click', _440hz)
-  buttons[1].addEventListener('click', _880hz)
+  }
 
 }
 
+
+export class buttonHarmony extends Demo {
+
+  start(audioCtx, element) {
+    __setup(this)
+
+    const sound = this.sound
+
+    const buttons = element.querySelectorAll('button')
+
+    const _440hz = sound(0.5, harmony(440))
+    const _880hz = sound(0.5, harmony(880))
+
+    buttons[0].addEventListener('click', _440hz)
+    buttons[1].addEventListener('click', _880hz)
+
+  }
+
+}
 
 const adsr = d3.scaleLinear()
     .domain([0, 0.2, 0.3, 0.4, 0.5])
     .range( [0, 1,   .3, .3,  0])
 
 
-export const buttonADSR = (audioCtx, element) => {
+export class buttonADSR extends Demo {
 
- const sound = setup(audioCtx, element)
+  start(audioCtx, element) {
+    __setup(this)
 
- const buttons = element.querySelectorAll('button')
+    const sound = this.sound
 
- const h440 = harmony(440)
- const h880 = harmony(880)
+     const buttons = element.querySelectorAll('button')
 
- const _440hz = sound(.5, t => adsr(t) * h440(t) )
- const _880hz = sound(.5, t => adsr(t) * h880(t) )
+     const h440 = harmony(440)
+     const h880 = harmony(880)
 
- buttons[0].addEventListener('click', _440hz)
- buttons[1].addEventListener('click', _880hz)
+     const _440hz = sound(.5, t => adsr(t) * h440(t) )
+     const _880hz = sound(.5, t => adsr(t) * h880(t) )
+
+     buttons[0].addEventListener('click', _440hz)
+     buttons[1].addEventListener('click', _880hz)
+
+  }
 
 }
