@@ -1,49 +1,57 @@
 import {generator, Scope} from './util.js'
 import Demo from './Base.js'
 
+class ButtonDemo extends Demo {
 
-const __setup = (demo) => {
+  start() {
+    const {element, audioCtx} = this
 
-  const {element, audioCtx} = demo
+    const range = element.querySelector('input')
+    const canvas = element.querySelector('canvas')
 
-  const range = element.querySelector('input')
-  const canvas = element.querySelector('canvas')
-
-  const gain = audioCtx.createGain()
-  const analyser = audioCtx.createAnalyser()
-
-
-  gain.connect(analyser)
-  analyser.connect(audioCtx.destination)
+    const gain = audioCtx.createGain()
+    const analyser = audioCtx.createAnalyser()
 
 
-  // connect gain
-  range.addEventListener('input', () =>
-    gain.gain.value = parseFloat(range.value)
-  )
-
-  // draw to canvas
-  const scope = new Scope(analyser, canvas)
-  const animate = () => {
-    demo.raf = requestAnimationFrame(animate)
-    scope.render()
-  }
-
-  animate()
+    gain.connect(analyser)
+    analyser.connect(audioCtx.destination)
 
 
-  const sound = generator(audioCtx, gain)
+    // connect gain
+    range.addEventListener('input', () =>
+      gain.gain.value = parseFloat(range.value)
+    )
 
-  demo.pause = () => {
-    cancelAnimationFrame(demo.raf)
-  }
-  demo.resume = () => {
+    // draw to canvas
+    const scope = new Scope(analyser, canvas)
+    const animate = () => {
+      this.raf = requestAnimationFrame(animate)
+      scope.render()
+    }
+
     animate()
+
+    this.animate = animate
+
+    this.sound = generator(audioCtx, gain)
+
+    this.buttonHandler(element.querySelectorAll('button'), this.sound)
   }
 
-  Object.assign(demo, { sound })
+  buttonHandler() {
+    console.error('not implemented')
+  }
+
+  pause() {
+    cancelAnimationFrame(this.raf)
+  }
+
+  resume() {
+    this.animate()
+  }
 
 }
+
 
 
 // Math.sin with period of 0..1
@@ -54,33 +62,27 @@ const harmony = f => t =>
   (sin(f * t * 3) / 3) +
   (sin(f * t * 7) / 7)
 
+const adsr = d3.scaleLinear()
+    .domain([0, 0.2, 0.3, 0.4, 0.5])
+    .range( [0, 1,   .3, .3,  0])
 
-export class buttonNoise extends Demo {
 
-  start(audioCtx, element) {
-    __setup(this)
+export class buttonNoise extends ButtonDemo {
 
-    const sound = this.sound
-
-    const buttons = element.querySelectorAll('button')
+  buttonHandler(buttons, sound) {
 
     const noise = sound(0.5, t => Math.random() * 0.2)
 
     buttons[0].addEventListener('click', noise)
 
   }
-}
 
+}
 
 
 export class buttonHz extends Demo {
 
-  start(audioCtx, element) {
-    __setup(this)
-
-    const sound = this.sound
-
-    const buttons = element.querySelectorAll('button')
+  buttonHandler(buttons, sound) {
 
     const _440hz = sound(0.5, t => sin(t * 440))
     const _880hz = sound(0.5, t => sin(t * 880))
@@ -95,12 +97,7 @@ export class buttonHz extends Demo {
 
 export class buttonHarmony extends Demo {
 
-  start(audioCtx, element) {
-    __setup(this)
-
-    const sound = this.sound
-
-    const buttons = element.querySelectorAll('button')
+  buttonHandler(buttons, sound) {
 
     const _440hz = sound(0.5, harmony(440))
     const _880hz = sound(0.5, harmony(880))
@@ -112,19 +109,9 @@ export class buttonHarmony extends Demo {
 
 }
 
-const adsr = d3.scaleLinear()
-    .domain([0, 0.2, 0.3, 0.4, 0.5])
-    .range( [0, 1,   .3, .3,  0])
-
-
 export class buttonADSR extends Demo {
 
-  start(audioCtx, element) {
-    __setup(this)
-
-    const sound = this.sound
-
-     const buttons = element.querySelectorAll('button')
+  buttonHandler(buttons, sound) {
 
      const h440 = harmony(440)
      const h880 = harmony(880)

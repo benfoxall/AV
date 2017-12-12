@@ -1,7 +1,9 @@
+
+// I *think* there's a prettier way of doing this
+// though I'm not sure
 const OFF = 0,
       STARTED = 1,
       PAUSED = 2
-
 
 const targets = new Map()
 
@@ -42,7 +44,6 @@ export default class Base {
 
   }
 
-
   handleObservation(event) {
     if(event.isIntersecting) {
       switch (this.state) {
@@ -75,8 +76,5 @@ export default class Base {
       }
     }
   }
-
-
-
 
 }

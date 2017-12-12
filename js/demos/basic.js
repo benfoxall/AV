@@ -16,7 +16,7 @@ export class basic extends Demo {
  }
 
  pause() {
-   this.wasPaused = this.media.paused;
+   this.wasPaused = this.media.paused
    this.media.pause()
  }
 

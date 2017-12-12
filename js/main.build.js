@@ -44,10 +44,11 @@ var c=a&&a.isIntersecting?a.intersectionRatio||0:-1,d=b.isIntersecting?
 b.intersectionRatio||0:-1;if(c!==d){ for(var f=0;f<this.thresholds.length;f++){var g=this$1.thresholds[f];if(g==c||g==d||g<c!==g<d){ return!0 }} }};d.prototype._rootIsInDom=function(){return!this.root||t(f,this.root)};d.prototype._rootContainsTarget=function(a){return t(this.root||f,a)};d.prototype._registerInstance=function(){0>k.indexOf(this)&&k.push(this);};d.prototype._unregisterInstance=function(){var a=k.indexOf(this);-1!=a&&k.splice(a,1);};h.IntersectionObserver=d;h.IntersectionObserverEntry=m;}})(window,
 document);
 
+// I *think* there's a prettier way of doing this
+// though I'm not sure
 var OFF = 0;
 var STARTED = 1;
 var PAUSED = 2;
-
 
 var targets = new Map();
 
@@ -87,7 +88,6 @@ Base.prototype.pause = function pause () {
 Base.prototype.resume = function resume () {
 
 };
-
 
 Base.prototype.handleObservation = function handleObservation (event) {
   if(event.isIntersecting) {
@@ -326,48 +326,68 @@ var basic = (function (Demo) {
   return basic;
 }(Base));
 
-var __setup = function (demo) {
+var ButtonDemo = (function (Demo) {
+  function ButtonDemo () {
+    Demo.apply(this, arguments);
+  }
 
-  var element = demo.element;
-  var audioCtx = demo.audioCtx;
+  if ( Demo ) ButtonDemo.__proto__ = Demo;
+  ButtonDemo.prototype = Object.create( Demo && Demo.prototype );
+  ButtonDemo.prototype.constructor = ButtonDemo;
 
-  var range = element.querySelector('input');
-  var canvas = element.querySelector('canvas');
+  ButtonDemo.prototype.start = function start () {
+    var this$1 = this;
 
-  var gain = audioCtx.createGain();
-  var analyser = audioCtx.createAnalyser();
+    var ref = this;
+    var element = ref.element;
+    var audioCtx = ref.audioCtx;
 
+    var range = element.querySelector('input');
+    var canvas = element.querySelector('canvas');
 
-  gain.connect(analyser);
-  analyser.connect(audioCtx.destination);
-
-
-  // connect gain
-  range.addEventListener('input', function () { return gain.gain.value = parseFloat(range.value); }
-  );
-
-  // draw to canvas
-  var scope = new Scope(analyser, canvas);
-  var animate = function () {
-    demo.raf = requestAnimationFrame(animate);
-    scope.render();
-  };
-
-  animate();
+    var gain = audioCtx.createGain();
+    var analyser = audioCtx.createAnalyser();
 
 
-  var sound = generator(audioCtx, gain);
+    gain.connect(analyser);
+    analyser.connect(audioCtx.destination);
 
-  demo.pause = function () {
-    cancelAnimationFrame(demo.raf);
-  };
-  demo.resume = function () {
+
+    // connect gain
+    range.addEventListener('input', function () { return gain.gain.value = parseFloat(range.value); }
+    );
+
+    // draw to canvas
+    var scope = new Scope(analyser, canvas);
+    var animate = function () {
+      this$1.raf = requestAnimationFrame(animate);
+      scope.render();
+    };
+
     animate();
+
+    this.animate = animate;
+
+    this.sound = generator(audioCtx, gain);
+
+    this.buttonHandler(element.querySelectorAll('button'), this.sound);
   };
 
-  Object.assign(demo, { sound: sound });
+  ButtonDemo.prototype.buttonHandler = function buttonHandler () {
+    console.error('not implemented');
+  };
 
-};
+  ButtonDemo.prototype.pause = function pause () {
+    cancelAnimationFrame(this.raf);
+  };
+
+  ButtonDemo.prototype.resume = function resume () {
+    this.animate();
+  };
+
+  return ButtonDemo;
+}(Base));
+
 
 
 // Math.sin with period of 0..1
@@ -377,22 +397,21 @@ var harmony = function (f) { return function (t) { return sin(f * t) +
   (sin(f * t * 3) / 3) +
   (sin(f * t * 7) / 7); }; };
 
+var adsr = d3.scaleLinear()
+    .domain([0, 0.2, 0.3, 0.4, 0.5])
+    .range( [0, 1,   .3, .3,  0]);
 
-var buttonNoise = (function (Demo) {
+
+var buttonNoise = (function (ButtonDemo) {
   function buttonNoise () {
-    Demo.apply(this, arguments);
+    ButtonDemo.apply(this, arguments);
   }
 
-  if ( Demo ) buttonNoise.__proto__ = Demo;
-  buttonNoise.prototype = Object.create( Demo && Demo.prototype );
+  if ( ButtonDemo ) buttonNoise.__proto__ = ButtonDemo;
+  buttonNoise.prototype = Object.create( ButtonDemo && ButtonDemo.prototype );
   buttonNoise.prototype.constructor = buttonNoise;
 
-  buttonNoise.prototype.start = function start (audioCtx, element) {
-    __setup(this);
-
-    var sound = this.sound;
-
-    var buttons = element.querySelectorAll('button');
+  buttonNoise.prototype.buttonHandler = function buttonHandler (buttons, sound) {
 
     var noise = sound(0.5, function (t) { return Math.random() * 0.2; });
 
@@ -401,8 +420,7 @@ var buttonNoise = (function (Demo) {
   };
 
   return buttonNoise;
-}(Base));
-
+}(ButtonDemo));
 
 
 var buttonHz = (function (Demo) {
@@ -414,12 +432,7 @@ var buttonHz = (function (Demo) {
   buttonHz.prototype = Object.create( Demo && Demo.prototype );
   buttonHz.prototype.constructor = buttonHz;
 
-  buttonHz.prototype.start = function start (audioCtx, element) {
-    __setup(this);
-
-    var sound = this.sound;
-
-    var buttons = element.querySelectorAll('button');
+  buttonHz.prototype.buttonHandler = function buttonHandler (buttons, sound) {
 
     var _440hz = sound(0.5, function (t) { return sin(t * 440); });
     var _880hz = sound(0.5, function (t) { return sin(t * 880); });
@@ -442,12 +455,7 @@ var buttonHarmony = (function (Demo) {
   buttonHarmony.prototype = Object.create( Demo && Demo.prototype );
   buttonHarmony.prototype.constructor = buttonHarmony;
 
-  buttonHarmony.prototype.start = function start (audioCtx, element) {
-    __setup(this);
-
-    var sound = this.sound;
-
-    var buttons = element.querySelectorAll('button');
+  buttonHarmony.prototype.buttonHandler = function buttonHandler (buttons, sound) {
 
     var _440hz = sound(0.5, harmony(440));
     var _880hz = sound(0.5, harmony(880));
@@ -460,11 +468,6 @@ var buttonHarmony = (function (Demo) {
   return buttonHarmony;
 }(Base));
 
-var adsr = d3.scaleLinear()
-    .domain([0, 0.2, 0.3, 0.4, 0.5])
-    .range( [0, 1,   .3, .3,  0]);
-
-
 var buttonADSR = (function (Demo) {
   function buttonADSR () {
     Demo.apply(this, arguments);
@@ -474,12 +477,7 @@ var buttonADSR = (function (Demo) {
   buttonADSR.prototype = Object.create( Demo && Demo.prototype );
   buttonADSR.prototype.constructor = buttonADSR;
 
-  buttonADSR.prototype.start = function start (audioCtx, element) {
-    __setup(this);
-
-    var sound = this.sound;
-
-     var buttons = element.querySelectorAll('button');
+  buttonADSR.prototype.buttonHandler = function buttonHandler (buttons, sound) {
 
      var h440 = harmony(440);
      var h880 = harmony(880);
