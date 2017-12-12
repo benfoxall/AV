@@ -307,6 +307,7 @@ var __setup = function (demo) {
 };
 
 
+// Math.sin with period of 0..1
 var sin = function (v) { return Math.sin(Math.PI * 2 * v); };
 
 var harmony = function (f) { return function (t) { return sin(f * t) +

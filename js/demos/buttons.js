@@ -46,39 +46,6 @@ const __setup = (demo) => {
 }
 
 
-const setup = (audioCtx, element) => {
-
-  const range = element.querySelector('input')
-  const canvas = element.querySelector('canvas')
-
-  const gain = audioCtx.createGain()
-  const analyser = audioCtx.createAnalyser()
-
-
-  gain.connect(analyser)
-  analyser.connect(audioCtx.destination)
-
-
-  // connect gain
-  range.addEventListener('input', () =>
-    gain.gain.value = parseFloat(range.value)
-  )
-
-  // draw to canvas
-  const scope = new Scope(analyser, canvas)
-  const animate = () => {
-    this.raf = requestAnimationFrame(animate)
-    scope.render()
-  }
-
-  animate()
-
-
-  return generator(audioCtx, gain)
-
-}
-
-
 // Math.sin with period of 0..1
 const sin = v => Math.sin(Math.PI * 2 * v)
 
