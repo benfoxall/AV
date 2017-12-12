@@ -34,10 +34,6 @@ export class keyboard extends Demo {
       (sin(f * t * 7) / 7))
       * 0.2 * sin(t * 2)
 
-    const preventDefault = fn => e => {
-      e.preventDefault()
-      fn(e)
-    }
 
     Array.from(element.querySelectorAll('svg rect'))
       .sort((a, b) =>
@@ -45,7 +41,14 @@ export class keyboard extends Demo {
       )
       .forEach((key, i) => {
         const s = sound(0.25, harmony(freq(i + 48)))
-        key.addEventListener('pointerenter', s)
+
+        const handler = e => {
+          e.preventDefault()
+          s()
+        }
+
+        key.addEventListener('pointerenter', handler)
+        key.addEventListener('touchstart', handler)
       })
 
   }

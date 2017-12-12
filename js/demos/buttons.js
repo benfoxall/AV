@@ -80,7 +80,7 @@ export class buttonNoise extends ButtonDemo {
 }
 
 
-export class buttonHz extends Demo {
+export class buttonHz extends ButtonDemo {
 
   buttonHandler(buttons, sound) {
 
@@ -95,7 +95,7 @@ export class buttonHz extends Demo {
 }
 
 
-export class buttonHarmony extends Demo {
+export class buttonHarmony extends ButtonDemo {
 
   buttonHandler(buttons, sound) {
 
@@ -109,7 +109,7 @@ export class buttonHarmony extends Demo {
 
 }
 
-export class buttonADSR extends Demo {
+export class buttonADSR extends ButtonDemo {
 
   buttonHandler(buttons, sound) {
 

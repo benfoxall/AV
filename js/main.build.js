@@ -3,7 +3,7 @@
 
 var style = Object.assign(
   document.createElement('style'),
-  {innerHTML: "\n    .🔈 {\n      background: hsla(0,0%,100%,.5);\n      border: 1px solid hsla(0, 0%, 0%, 0.09);\n\n      display: grid;\n\n      padding: 1em;\n      grid-gap: 1em;\n    }\n    .🔈 input {\n      grid-column: 2/4;\n      grid-row: 1;\n      justify-self: stretch\n    }\n\n    .🔈 canvas {\n      grid-column: 1/4;\n      grid-row: 2;\n      justify-self: stretch;\n      height: 75px;\n    }\n\n    .🔈 button {\n      border: 1px solid #3f3f46;\n      padding: .2em;\n    }\n  "
+  {innerHTML: "\n    .🔈 {\n      background: hsla(0,0%,100%,.5);\n      border: 1px solid hsla(0, 0%, 0%, 0.09);\n\n      display: grid;\n\n      padding: 1em;\n      grid-gap: 1em;\n    }\n    .🔈 input {\n      grid-column: 2/4;\n      grid-row: 1;\n      justify-self: stretch\n    }\n\n    .🔈 canvas {\n      grid-column: 1/4;\n      grid-row: 2;\n      justify-self: stretch;\n      height: 75px;\n    }\n\n    .🔈 button {\n      border: 1px solid #3f3f46;\n      padding: .2em;\n    }\n\n    .🔈 svg {\n      grid-column: 1/4;\n      justify-self: stretch;\n      width: 100%;\n    }\n  "
   }
 );
 
@@ -423,13 +423,13 @@ var buttonNoise = (function (ButtonDemo) {
 }(ButtonDemo));
 
 
-var buttonHz = (function (Demo) {
+var buttonHz = (function (ButtonDemo) {
   function buttonHz () {
-    Demo.apply(this, arguments);
+    ButtonDemo.apply(this, arguments);
   }
 
-  if ( Demo ) buttonHz.__proto__ = Demo;
-  buttonHz.prototype = Object.create( Demo && Demo.prototype );
+  if ( ButtonDemo ) buttonHz.__proto__ = ButtonDemo;
+  buttonHz.prototype = Object.create( ButtonDemo && ButtonDemo.prototype );
   buttonHz.prototype.constructor = buttonHz;
 
   buttonHz.prototype.buttonHandler = function buttonHandler (buttons, sound) {
@@ -443,16 +443,16 @@ var buttonHz = (function (Demo) {
   };
 
   return buttonHz;
-}(Base));
+}(ButtonDemo));
 
 
-var buttonHarmony = (function (Demo) {
+var buttonHarmony = (function (ButtonDemo) {
   function buttonHarmony () {
-    Demo.apply(this, arguments);
+    ButtonDemo.apply(this, arguments);
   }
 
-  if ( Demo ) buttonHarmony.__proto__ = Demo;
-  buttonHarmony.prototype = Object.create( Demo && Demo.prototype );
+  if ( ButtonDemo ) buttonHarmony.__proto__ = ButtonDemo;
+  buttonHarmony.prototype = Object.create( ButtonDemo && ButtonDemo.prototype );
   buttonHarmony.prototype.constructor = buttonHarmony;
 
   buttonHarmony.prototype.buttonHandler = function buttonHandler (buttons, sound) {
@@ -466,15 +466,15 @@ var buttonHarmony = (function (Demo) {
   };
 
   return buttonHarmony;
-}(Base));
+}(ButtonDemo));
 
-var buttonADSR = (function (Demo) {
+var buttonADSR = (function (ButtonDemo) {
   function buttonADSR () {
-    Demo.apply(this, arguments);
+    ButtonDemo.apply(this, arguments);
   }
 
-  if ( Demo ) buttonADSR.__proto__ = Demo;
-  buttonADSR.prototype = Object.create( Demo && Demo.prototype );
+  if ( ButtonDemo ) buttonADSR.__proto__ = ButtonDemo;
+  buttonADSR.prototype = Object.create( ButtonDemo && ButtonDemo.prototype );
   buttonADSR.prototype.constructor = buttonADSR;
 
   buttonADSR.prototype.buttonHandler = function buttonHandler (buttons, sound) {
@@ -491,7 +491,7 @@ var buttonADSR = (function (Demo) {
   };
 
   return buttonADSR;
-}(Base));
+}(ButtonDemo));
 
 var keyboard = (function (Demo) {
   function keyboard () {
@@ -533,12 +533,20 @@ var keyboard = (function (Demo) {
       (sin(f * t * 7) / 7))
       * 0.2 * sin(t * 2); }; };
 
+
     Array.from(element.querySelectorAll('svg rect'))
       .sort(function (a, b) { return parseFloat(a.getAttribute('x')) - parseFloat(b.getAttribute('x')); }
       )
       .forEach(function (key, i) {
         var s = sound(0.25, harmony(freq(i + 48)));
-        key.addEventListener('pointerenter', s);
+
+        var handler = function (e) {
+          e.preventDefault();
+          s();
+        };
+
+        key.addEventListener('pointerenter', handler);
+        key.addEventListener('touchstart', handler);
       });
 
   };
