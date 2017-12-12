@@ -18,6 +18,7 @@ class ButtonDemo extends Demo {
 
 
     // connect gain
+    gain.gain.value = parseFloat(range.value)
     range.addEventListener('input', () =>
       gain.gain.value = parseFloat(range.value)
     )
@@ -31,9 +32,11 @@ class ButtonDemo extends Demo {
 
     animate()
 
-    this.animate = animate
+    const sound = generator(audioCtx, gain)
 
-    this.sound = generator(audioCtx, gain)
+    Object.assign(this, {
+      range, gain, animate, sound
+    })
 
     this.buttonHandler(element.querySelectorAll('button'), this.sound)
   }
@@ -48,6 +51,7 @@ class ButtonDemo extends Demo {
 
   resume() {
     this.animate()
+    this.gain.gain.value = parseFloat(this.range.value)
   }
 
 }

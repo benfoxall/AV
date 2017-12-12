@@ -6,6 +6,7 @@ import BaseDemo from './demos/Base.js'
 import { analyser } from './demos/analyser.js'
 import { gain } from './demos/gain.js'
 import { basic } from './demos/basic.js'
+import { plain } from './demos/plain.js'
 
 import { buttonNoise } from './demos/buttons.js'
 import { buttonHz } from './demos/buttons.js'
@@ -18,6 +19,7 @@ const demos = {
   analyser,
   gain,
   basic,
+  plain,
 
   buttonNoise,
   buttonHz,
@@ -46,3 +48,23 @@ Array.from(document.querySelectorAll('.🔈[data-demo]'))
 
 
   })
+
+
+Array.from(document.querySelectorAll('.🔈 audio'))
+  .forEach((audio, i, all) =>
+    audio.addEventListener('pause', () =>
+      all
+        .filter(other => other !== audio)
+        .forEach(other => other.currentTime = audio.currentTime)
+    )
+  )
+
+
+Array.from(document.querySelectorAll('.🔈 input[type=range]'))
+  .forEach((range, i, all) =>
+    range.addEventListener('change', () =>
+      all
+        .filter(other => other !== range)
+        .forEach(other => other.value = range.value)
+    )
+  )

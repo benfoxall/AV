@@ -326,6 +326,34 @@ var basic = (function (Demo) {
   return basic;
 }(Base));
 
+var plain = (function (Demo) {
+  function plain () {
+    Demo.apply(this, arguments);
+  }
+
+  if ( Demo ) plain.__proto__ = Demo;
+  plain.prototype = Object.create( Demo && Demo.prototype );
+  plain.prototype.constructor = plain;
+
+  plain.prototype.start = function start (audioCtx, element) {
+
+   var media = element.querySelector('audio');
+   Object.assign(this, {media: media});
+
+ };
+
+ plain.prototype.pause = function pause () {
+   this.wasPaused = this.media.paused;
+   this.media.pause();
+ };
+
+ plain.prototype.resume = function resume () {
+   if(!this.wasPaused) { this.media.play(); }
+ };
+
+  return plain;
+}(Base));
+
 var ButtonDemo = (function (Demo) {
   function ButtonDemo () {
     Demo.apply(this, arguments);
@@ -354,6 +382,7 @@ var ButtonDemo = (function (Demo) {
 
 
     // connect gain
+    gain.gain.value = parseFloat(range.value);
     range.addEventListener('input', function () { return gain.gain.value = parseFloat(range.value); }
     );
 
@@ -366,9 +395,11 @@ var ButtonDemo = (function (Demo) {
 
     animate();
 
-    this.animate = animate;
+    var sound = generator(audioCtx, gain);
 
-    this.sound = generator(audioCtx, gain);
+    Object.assign(this, {
+      range: range, gain: gain, animate: animate, sound: sound
+    });
 
     this.buttonHandler(element.querySelectorAll('button'), this.sound);
   };
@@ -383,6 +414,7 @@ var ButtonDemo = (function (Demo) {
 
   ButtonDemo.prototype.resume = function resume () {
     this.animate();
+    this.gain.gain.value = parseFloat(this.range.value);
   };
 
   return ButtonDemo;
@@ -568,6 +600,7 @@ var demos = {
   analyser: analyser,
   gain: gain,
   basic: basic,
+  plain: plain,
 
   buttonNoise: buttonNoise,
   buttonHz: buttonHz,
@@ -596,5 +629,21 @@ Array.from(document.querySelectorAll('.🔈[data-demo]'))
 
 
   });
+
+
+Array.from(document.querySelectorAll('.🔈 audio'))
+  .forEach(function (audio, i, all) { return audio.addEventListener('pause', function () { return all
+        .filter(function (other) { return other !== audio; })
+        .forEach(function (other) { return other.currentTime = audio.currentTime; }); }
+    ); }
+  );
+
+
+Array.from(document.querySelectorAll('.🔈 input[type=range]'))
+  .forEach(function (range, i, all) { return range.addEventListener('change', function () { return all
+        .filter(function (other) { return other !== range; })
+        .forEach(function (other) { return other.value = range.value; }); }
+    ); }
+  );
 
 }());
