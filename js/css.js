@@ -27,6 +27,12 @@ const style = Object.assign(
       border: 1px solid #3f3f46;
       padding: .2em;
     }
+
+    .🔈 svg {
+      grid-column: 1/4;
+      justify-self: stretch;
+      width: 100%;
+    }
   `
   }
 )
