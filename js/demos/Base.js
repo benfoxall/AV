@@ -3,6 +3,14 @@ const OFF = 0,
       PAUSED = 2
 
 
+const targets = new Map()
+
+var observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if(targets.has(entry.target))
+      targets.get(entry.target)(entry)
+  })
+})
 
 // This is a helper to start/stop scripts as they scroll into view
 export default class Base {
@@ -10,6 +18,13 @@ export default class Base {
   constructor(audioCtx, element) {
     Object.assign(this, {audioCtx, element})
     this.state = OFF
+
+    // set up intersection listener
+    targets.set(element, (e) => {
+      this.handleObservation(e)
+    })
+
+    observer.observe(element)
   }
 
 
@@ -29,7 +44,6 @@ export default class Base {
 
 
   handleObservation(event) {
-
     if(event.isIntersecting) {
       switch (this.state) {
         case OFF:

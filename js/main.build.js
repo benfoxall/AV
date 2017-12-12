@@ -49,11 +49,28 @@ var STARTED = 1;
 var PAUSED = 2;
 
 
+var targets = new Map();
+
+var observer = new IntersectionObserver(function (entries) {
+  entries.forEach(function (entry) {
+    if(targets.has(entry.target))
+      { targets.get(entry.target)(entry); }
+  });
+});
 
 // This is a helper to start/stop scripts as they scroll into view
 var Base = function Base(audioCtx, element) {
+  var this$1 = this;
+
   Object.assign(this, {audioCtx: audioCtx, element: element});
   this.state = OFF;
+
+  // set up intersection listener
+  targets.set(element, function (e) {
+    this$1.handleObservation(e);
+  });
+
+  observer.observe(element);
 };
 
 
@@ -73,7 +90,6 @@ Base.prototype.resume = function resume () {
 
 
 Base.prototype.handleObservation = function handleObservation (event) {
-
   if(event.isIntersecting) {
     switch (this.state) {
       case OFF:
@@ -234,34 +250,81 @@ var analyser = (function (Demo) {
   return analyser;
 }(Base));
 
-var gain = function (audioCtx, element) {
+var gain = (function (Demo) {
+  function gain () {
+    Demo.apply(this, arguments);
+  }
 
-  var media = element.querySelector('audio');
-  var range = element.querySelector('input');
+  if ( Demo ) gain.__proto__ = Demo;
+  gain.prototype = Object.create( Demo && Demo.prototype );
+  gain.prototype.constructor = gain;
 
-  var source = audioCtx.createMediaElementSource(media);
-  var gain = audioCtx.createGain();
+  gain.prototype.start = function start (audioCtx, element) {
 
-  // create the audio graph
-  source.connect(gain);
-  gain.connect(audioCtx.destination);
+    var media = element.querySelector('audio');
+    var range = element.querySelector('input');
+
+    var source = audioCtx.createMediaElementSource(media);
+    var gain = audioCtx.createGain();
+
+    // create the audio graph
+    source.connect(gain);
+    gain.connect(audioCtx.destination);
 
 
-  // connect gain
-  range.addEventListener('input', function () { return gain.gain.value = parseFloat(range.value); }
-  );
+    // connect gain
+    range.addEventListener('input', function () { return gain.gain.value = parseFloat(range.value); }
+    );
 
-};
+    Object.assign(this, {media: media});
 
-var basic = function (audioCtx, element) {
+  };
 
-  var media = element.querySelector('audio');
-  var source = audioCtx.createMediaElementSource(media);
+  gain.prototype.pause = function pause () {
+    this.wasPaused = this.media.paused;
+    this.media.pause();
+  };
 
-  // create the audio graph
-  source.connect(audioCtx.destination);
+  gain.prototype.resume = function resume () {
+    if(!this.wasPaused) { this.media.play(); }
+  };
 
-};
+  return gain;
+}(Base));
+
+var basic = (function (Demo) {
+  function basic () {
+    Demo.apply(this, arguments);
+  }
+
+  if ( Demo ) basic.__proto__ = Demo;
+  basic.prototype = Object.create( Demo && Demo.prototype );
+  basic.prototype.constructor = basic;
+
+  basic.prototype.start = function start (audioCtx, element) {
+
+   var media = element.querySelector('audio');
+   var source = audioCtx.createMediaElementSource(media);
+
+   // create the audio graph
+   source.connect(audioCtx.destination);
+
+
+   Object.assign(this, {media: media});
+
+ };
+
+ basic.prototype.pause = function pause () {
+   this.wasPaused = this.media.paused;
+   this.media.pause();
+ };
+
+ basic.prototype.resume = function resume () {
+   if(!this.wasPaused) { this.media.play(); }
+ };
+
+  return basic;
+}(Base));
 
 var __setup = function (demo) {
 
@@ -512,15 +575,6 @@ var demos = {
 var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 
-var targets = new Map();
-
-var observer = new IntersectionObserver(function (entries) {
-  entries.forEach(function (entry) {
-    if(targets.has(entry.target))
-      { targets.get(entry.target)(entry); }
-  });
-});
-
 // run scripts on each section
 Array.from(document.querySelectorAll('.🔈[data-demo]'))
   .forEach(function (section) {
@@ -528,21 +582,12 @@ Array.from(document.querySelectorAll('.🔈[data-demo]'))
 
     var demo = demos[name];
 
-    if(!demo) { return console.warn(("Demo not found: \"" + name + "\"")) }
+    if(demo)
+      { new demo(audioCtx, section); }
 
-    if(demo.prototype instanceof Base) {
-      var _demo = new demo(audioCtx, section);
+    else
+      { console.warn(("Demo not found: \"" + name + "\"")); }
 
-      // set up targets
-      targets.set(section, function (e) {
-        _demo.handleObservation(e);
-        console.log(name, e.isIntersecting);
-      });
-
-      observer.observe(section);
-    } else {
-      demo(audioCtx, section);
-    }
 
   });
 
