@@ -85,7 +85,7 @@ You can now see a range input, which can be dragged to update the state of our g
 
 This input could be any kind of element, so now you'll be free to build the [volume control of your dreams](https://uxdesign.cc/the-worst-volume-control-ui-in-the-world-60713dc86950).
 
-There's a number of nodes that let you modify/filter an audio stream more interesting ways.  Head over to the [MDN Web Audio page](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API#Defining_audio_effects_filters) for a list of them.
+There's a number of nodes that let you modify/filter an audio stream in more interesting ways.  Head over to the [MDN Web Audio page](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API#Defining_audio_effects_filters) for a list of them.
 
 
 <!-- ![(audio) -> (gain) -> (output)](images/graph-gain.svg) -->
@@ -143,7 +143,7 @@ You can see that we have two arrays of data available (I added colours for clari
 1. The waveform - the raw samples of the audio being played.
 2. The frequencies - a [fourier transform](https://giphy.com/gifs/Km4XeiMqFNCDK/html5) of the audio passing through the node.
 
-What's cool about this is that you're not tied to any specific functionality of the Web Audio API.  If it's possible for you update something with an array of numbers, then you can just apply it to the output of the analyser node.
+What's cool about this is that you're not tied to any specific functionality of the Web Audio API.  If it's possible for you to update something with an array of numbers, then you can just apply it to the output of the analyser node.
 
 For instance, if we _wanted to_, we could definitely animate a list of emoji in time with our music.
 
@@ -167,7 +167,7 @@ So far, we've been using the `<audio>` element as a source of sound.
 
 There's [a few](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API#Defining_audio_sources) other sources of audio that we can use.  We'll look at the _AudioBufferNode_ - which allows you to manually generate a sound sample, and then connect it to our graph.
 
-First have to create an _AudioBuffer_, which holds our raw data, then we pass that to an _AudioBufferNode_ which we can then treat just like our _AudioSource_ node.
+First we have to create an _AudioBuffer_, which holds our raw data, then we pass that to an _AudioBufferNode_ which we can then treat just like our _AudioSource_ node.
 
 This can get a bit boring, so we'll use a helper method that makes it simpler to generate sounds.
 
@@ -220,7 +220,7 @@ Rather than having a static set of audio nodes, each time we click the button, w
 
 <!-- / [buffer]   (source) => (analyser) => (gain) => (output) -->
 
-An interesting property of defining sounds as functions, is that we can combine multiple function to generate new sounds.
+An interesting property of defining sounds as functions is that we can combine multiple function to generate new sounds.
 
 So if we wanted to fade our noise in & out, we could write a higher order function that does that.
 
@@ -321,7 +321,7 @@ But we're going to stay with this approach because it's fun, and sometimes the f
 
 Having a button that makes a sound is totally great, but how about lots of buttons that make lots of sounds?  Yup, totally greater-er.
 
-The first thing we need to know the what frequency each note is.
+The first thing we need to know is the frequency of each note.
 
 I thought this would be awkward because pianos were invented more than 250 years before the Hz unit was defined, so surely there wouldn't be a simple mapping between the two?
 
@@ -355,15 +355,15 @@ Array.from(svg.querySelector('rect'))
 
 Et voilà. We have a keyboard.
 
-What I like about this is that it's completely pure - there's no lookup tables or hardcoded attributes; we've just defined a mapping from svg elements to the sound they should probably make.
+What I like about this is that it's completely pure - there's no lookup tables or hardcoded attributes; we've just defined a mapping from SVG elements to the sound they should probably make.
 
 <!-- Something that's kind of fun about this is that we can apply our code to any SVG at all and make a keyboard out of it. -->
 
 ### Doing better in the future
 
-As I mentioned before, this could be implemented more performantly with Web Audio nodes, or even better - you use something like [Tone.js](https://tonejs.github.io/) to be performant for you.
+As I mentioned before, this could be implemented more performantly with Web Audio nodes, or even better - use something like [Tone.js](https://tonejs.github.io/) to be performant for you.
 
-Web Audio has been around for a while, though we're getting new challenges with immersive WebXR experiences, where [spatial audio](https://googlechrome.github.io/omnitone/#home) becomes really important.
+Web Audio has been around for awhile, though we're getting new challenges with immersive WebXR experiences, where [spatial audio](https://googlechrome.github.io/omnitone/#home) becomes really important.
 
 There's also always support & api improvements (if you like _AudioBufferNode_, you're going to *love* [_AudioWorklet_](https://webaudio.github.io/web-audio-api/#AudioWorklet))
 
@@ -371,9 +371,9 @@ There's also always support & api improvements (if you like _AudioBufferNode_, y
 
 And that's about it.
 
-Web Audio isn't some black box, you can easily link it with whatever framework, or UI that you've built (whether you should, is an entirely different question).
+Web Audio isn't some black box, you can easily link it with whatever framework, or UI that you've built (whether you should is an entirely different question).
 
-And if anyone ever asks you "could you turn this SVG into a musical instrument" you don't have to stare blankly at them anymore.
+And if anyone ever asks you "could you turn this SVG into a musical instrument?" you don't have to stare blankly at them anymore.
 
 
 ---

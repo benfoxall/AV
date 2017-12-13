@@ -400,6 +400,7 @@ var basic = (function (Demo) {
   return basic;
 }(Base));
 
+// No Audio Graph here, just for pausing/playing
 var plain = (function (Demo) {
   function plain () {
     Demo.apply(this, arguments);

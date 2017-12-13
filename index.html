@@ -95,7 +95,7 @@ node.connect(audioCtx.destination)
 
 <p>You can now see a range input, which can be dragged to update the state of our graph.</p>
 <p>This input could be any kind of element, so now you&#39;ll be free to build the <a href="https://uxdesign.cc/the-worst-volume-control-ui-in-the-world-60713dc86950">volume control of your dreams</a>.</p>
-<p>There&#39;s a number of nodes that let you modify/filter an audio stream more interesting ways.  Head over to the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API#Defining_audio_effects_filters">MDN Web Audio page</a> for a list of them.</p>
+<p>There&#39;s a number of nodes that let you modify/filter an audio stream in more interesting ways.  Head over to the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API#Defining_audio_effects_filters">MDN Web Audio page</a> for a list of them.</p>
 <!-- ![(audio) -> (gain) -> (output)](images/graph-gain.svg) -->
 <h2 id="analysers">Analysers</h2>
 <p>Something else we can add to our graph is an <em>AnalyserNode</em>.</p>
@@ -138,7 +138,7 @@ loop()
 <li>The waveform - the raw samples of the audio being played.</li>
 <li>The frequencies - a <a href="https://giphy.com/gifs/Km4XeiMqFNCDK/html5">fourier transform</a> of the audio passing through the node.</li>
 </ol>
-<p>What&#39;s cool about this is that you&#39;re not tied to any specific functionality of the Web Audio API.  If it&#39;s possible for you update something with an array of numbers, then you can just apply it to the output of the analyser node.</p>
+<p>What&#39;s cool about this is that you&#39;re not tied to any specific functionality of the Web Audio API.  If it&#39;s possible for you to update something with an array of numbers, then you can just apply it to the output of the analyser node.</p>
 <p>For instance, if we <em>wanted to</em>, we could definitely animate a list of emoji in time with our music.</p>
 <pre><code class="lang-js">spans.forEach(
   (s, i) =&gt; s.style.transform = `scale(${1 + (frequencies[i]/100)})`
@@ -155,7 +155,7 @@ loop()
 <h3 id="generating-audio">Generating Audio</h3>
 <p>So far, we&#39;ve been using the <code>&lt;audio&gt;</code> element as a source of sound.</p>
 <p>There&#39;s <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API#Defining_audio_sources">a few</a> other sources of audio that we can use.  We&#39;ll look at the <em>AudioBufferNode</em> - which allows you to manually generate a sound sample, and then connect it to our graph.</p>
-<p>First have to create an <em>AudioBuffer</em>, which holds our raw data, then we pass that to an <em>AudioBufferNode</em> which we can then treat just like our <em>AudioSource</em> node.</p>
+<p>First we have to create an <em>AudioBuffer</em>, which holds our raw data, then we pass that to an <em>AudioBufferNode</em> which we can then treat just like our <em>AudioSource</em> node.</p>
 <p>This can get a bit boring, so we&#39;ll use a helper method that makes it simpler to generate sounds.</p>
 <pre><code class="lang-js">const generator = (audioCtx, target) =&gt; (seconds, fn) =&gt; {
   const { sampleRate } = audioCtx
@@ -197,7 +197,7 @@ button.onclick = noise
 <p>Now we&#39;ve got a noisy button! Handy.</p>
 <p>Rather than having a static set of audio nodes, each time we click the button, we add a new node to our graph. Although this feels inefficient, it&#39;s not actually too bad - the browser can do a good job of cleaning up old nodes once they&#39;ve played.</p>
 <!-- / [buffer]   (source) => (analyser) => (gain) => (output) -->
-<p>An interesting property of defining sounds as functions, is that we can combine multiple function to generate new sounds.</p>
+<p>An interesting property of defining sounds as functions is that we can combine multiple function to generate new sounds.</p>
 <p>So if we wanted to fade our noise in &amp; out, we could write a higher order function that does that.</p>
 <pre><code class="lang-js">const ease = fn =&gt; (t, s) =&gt;
   fn(t) * Math.sin((t / s) * Math.PI)
@@ -273,7 +273,7 @@ const a440 = sound(0.75, ease(harmony(440)))
 <p>But we&#39;re going to stay with this approach because it&#39;s fun, and sometimes the fun thing to do might not technically be the best thing to do.</p>
 <h3 id="making-a-keyboard">Making a keyboard</h3>
 <p>Having a button that makes a sound is totally great, but how about lots of buttons that make lots of sounds?  Yup, totally greater-er.</p>
-<p>The first thing we need to know the what frequency each note is.</p>
+<p>The first thing we need to know is the frequency of each note.</p>
 <p>I thought this would be awkward because pianos were invented more than 250 years before the Hz unit was defined, so surely there wouldn&#39;t be a simple mapping between the two?</p>
 <pre><code class="lang-js">const freq = note =&gt; 27.5 * Math.pow(2, (note - 21) / 12)
 </code></pre>
@@ -298,16 +298,16 @@ const a440 = sound(0.75, ease(harmony(440)))
 </section>
 
 <p>Et voilà. We have a keyboard.</p>
-<p>What I like about this is that it&#39;s completely pure - there&#39;s no lookup tables or hardcoded attributes; we&#39;ve just defined a mapping from svg elements to the sound they should probably make.</p>
+<p>What I like about this is that it&#39;s completely pure - there&#39;s no lookup tables or hardcoded attributes; we&#39;ve just defined a mapping from SVG elements to the sound they should probably make.</p>
 <!-- Something that's kind of fun about this is that we can apply our code to any SVG at all and make a keyboard out of it. -->
 <h3 id="doing-better-in-the-future">Doing better in the future</h3>
-<p>As I mentioned before, this could be implemented more performantly with Web Audio nodes, or even better - you use something like <a href="https://tonejs.github.io/">Tone.js</a> to be performant for you.</p>
-<p>Web Audio has been around for a while, though we&#39;re getting new challenges with immersive WebXR experiences, where <a href="https://googlechrome.github.io/omnitone/#home">spatial audio</a> becomes really important.</p>
+<p>As I mentioned before, this could be implemented more performantly with Web Audio nodes, or even better - use something like <a href="https://tonejs.github.io/">Tone.js</a> to be performant for you.</p>
+<p>Web Audio has been around for awhile, though we&#39;re getting new challenges with immersive WebXR experiences, where <a href="https://googlechrome.github.io/omnitone/#home">spatial audio</a> becomes really important.</p>
 <p>There&#39;s also always support &amp; api improvements (if you like <em>AudioBufferNode</em>, you&#39;re going to <em>love</em> <a href="https://webaudio.github.io/web-audio-api/#AudioWorklet"><em>AudioWorklet</em></a>)</p>
 <h3 id="conclusion">Conclusion</h3>
 <p>And that&#39;s about it.</p>
-<p>Web Audio isn&#39;t some black box, you can easily link it with whatever framework, or UI that you&#39;ve built (whether you should, is an entirely different question).</p>
-<p>And if anyone ever asks you &quot;could you turn this SVG into a musical instrument&quot; you don&#39;t have to stare blankly at them anymore.</p>
+<p>Web Audio isn&#39;t some black box, you can easily link it with whatever framework, or UI that you&#39;ve built (whether you should is an entirely different question).</p>
+<p>And if anyone ever asks you &quot;could you turn this SVG into a musical instrument?&quot; you don&#39;t have to stare blankly at them anymore.</p>
 <hr>
 <p>Ben Foxall is a JavaScript Engineer and Adventurist. After 16 years of avoiding the subject; he&#39;d like to tell Jamie that he probably did lose that mix-tape - he&#39;s sorry about, but also, he&#39;s not sure it was as good as Jamie made out.  Oh and also, Chris, sorry for breaking your phone, and that I still laugh every time I think about it.</p>
 
