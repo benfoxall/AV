@@ -57,6 +57,9 @@ class ButtonDemo extends Demo {
 }
 
 
+const ease = fn => (t, s) =>
+  fn(t) * Math.sin((t / s) * Math.PI)
+
 
 // Math.sin with period of 0..1
 const sin = v => Math.sin(Math.PI * 2 * v)
@@ -71,11 +74,36 @@ const adsr = d3.scaleLinear()
     .range( [0, 1,   .3, .3,  0])
 
 
+const _zag = d3.scaleLinear()
+    .domain([0, 0.5,  1])
+    .range([-1,  1, -1])
+
+const zag = t => _zag(t % 1)
+
+const harmonyz = f => t =>
+  zag(f * t) +
+  (zag(f * t * 3) / 3) +
+  (zag(f * t * 7) / 7)
+
+
 export class buttonNoise extends ButtonDemo {
 
   buttonHandler(buttons, sound) {
 
-    const noise = sound(0.5, t => Math.random() * 0.2)
+    const noise = sound(.75, t => Math.random() * 0.2)
+
+    buttons[0].addEventListener('click', noise)
+
+  }
+
+}
+
+
+export class buttonEase extends ButtonDemo {
+
+  buttonHandler(buttons, sound) {
+
+    const noise = sound(.75, ease(t => Math.random() * 0.2))
 
     buttons[0].addEventListener('click', noise)
 
@@ -88,8 +116,8 @@ export class buttonHz extends ButtonDemo {
 
   buttonHandler(buttons, sound) {
 
-    const _440hz = sound(0.5, t => sin(t * 440))
-    const _880hz = sound(0.5, t => sin(t * 880))
+    const _440hz = sound(.75, ease(t => sin(t * 440)))
+    const _880hz = sound(.75, ease(t => sin(t * 880)))
 
     buttons[0].addEventListener('click', _440hz)
     buttons[1].addEventListener('click', _880hz)
@@ -103,8 +131,8 @@ export class buttonHarmony extends ButtonDemo {
 
   buttonHandler(buttons, sound) {
 
-    const _440hz = sound(0.5, harmony(440))
-    const _880hz = sound(0.5, harmony(880))
+    const _440hz = sound(.75, ease(harmony(440)))
+    const _880hz = sound(.75, ease(harmony(880)))
 
     buttons[0].addEventListener('click', _440hz)
     buttons[1].addEventListener('click', _880hz)
@@ -120,8 +148,26 @@ export class buttonADSR extends ButtonDemo {
      const h440 = harmony(440)
      const h880 = harmony(880)
 
-     const _440hz = sound(.5, t => adsr(t) * h440(t) )
-     const _880hz = sound(.5, t => adsr(t) * h880(t) )
+     const _440hz = sound(.75, t => adsr(t) * h440(t) )
+     const _880hz = sound(.75, t => adsr(t) * h880(t) )
+
+     buttons[0].addEventListener('click', _440hz)
+     buttons[1].addEventListener('click', _880hz)
+
+  }
+
+}
+
+
+export class buttonD3 extends ButtonDemo {
+
+  buttonHandler(buttons, sound) {
+
+     const h440 = ease(harmonyz(440))
+     const h880 = ease(harmonyz(880))
+
+     const _440hz = sound(.75, h440 )
+     const _880hz = sound(.75, h880 )
 
      buttons[0].addEventListener('click', _440hz)
      buttons[1].addEventListener('click', _880hz)

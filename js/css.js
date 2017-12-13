@@ -33,6 +33,17 @@ const style = Object.assign(
       justify-self: stretch;
       width: 100%;
     }
+
+    .🔈 .emoji {
+      grid-column: 1/4;
+      justify-self: stretch;
+      width: 100%;
+      margin-top: 1em;
+    }
+
+    .🔈 .emoji span {
+      display: inline-block;
+    }
   `
   }
 )

@@ -3,7 +3,7 @@
 
 var style = Object.assign(
   document.createElement('style'),
-  {innerHTML: "\n    .🔈 {\n      background: hsla(0,0%,100%,.5);\n      border: 1px solid hsla(0, 0%, 0%, 0.09);\n\n      display: grid;\n\n      padding: 1em;\n      grid-gap: 1em;\n    }\n    .🔈 input {\n      grid-column: 2/4;\n      grid-row: 1;\n      justify-self: stretch\n    }\n\n    .🔈 canvas {\n      grid-column: 1/4;\n      grid-row: 2;\n      justify-self: stretch;\n      height: 75px;\n    }\n\n    .🔈 button {\n      border: 1px solid #3f3f46;\n      padding: .2em;\n    }\n\n    .🔈 svg {\n      grid-column: 1/4;\n      justify-self: stretch;\n      width: 100%;\n    }\n  "
+  {innerHTML: "\n    .🔈 {\n      background: hsla(0,0%,100%,.5);\n      border: 1px solid hsla(0, 0%, 0%, 0.09);\n\n      display: grid;\n\n      padding: 1em;\n      grid-gap: 1em;\n    }\n    .🔈 input {\n      grid-column: 2/4;\n      grid-row: 1;\n      justify-self: stretch\n    }\n\n    .🔈 canvas {\n      grid-column: 1/4;\n      grid-row: 2;\n      justify-self: stretch;\n      height: 75px;\n    }\n\n    .🔈 button {\n      border: 1px solid #3f3f46;\n      padding: .2em;\n    }\n\n    .🔈 svg {\n      grid-column: 1/4;\n      justify-self: stretch;\n      width: 100%;\n    }\n\n    .🔈 .emoji {\n      grid-column: 1/4;\n      justify-self: stretch;\n      width: 100%;\n      margin-top: 1em;\n    }\n\n    .🔈 .emoji span {\n      display: inline-block;\n    }\n  "
   }
 );
 
@@ -250,6 +250,80 @@ var analyser = (function (Demo) {
   return analyser;
 }(Base));
 
+var emoji = (function (Demo) {
+  function emoji () {
+    Demo.apply(this, arguments);
+  }
+
+  if ( Demo ) emoji.__proto__ = Demo;
+  emoji.prototype = Object.create( Demo && Demo.prototype );
+  emoji.prototype.constructor = emoji;
+
+  emoji.prototype.start = function start () {
+    var this$1 = this;
+
+    var ref = this;
+    var element = ref.element;
+    var audioCtx = ref.audioCtx;
+
+    var media = element.querySelector('audio');
+    var range = element.querySelector('input');
+    var emoji = element.querySelectorAll('.emoji span');
+
+
+    var source = audioCtx.createMediaElementSource(media);
+    var gain = audioCtx.createGain();
+    var analyser = audioCtx.createAnalyser();
+
+    // create the audio graph
+    source.connect(gain);
+    gain.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    // connect gain
+    range.addEventListener('input', function () { return gain.gain.value = parseFloat(range.value); }
+    );
+
+
+    window.a = analyser;
+
+    var frequencies = new Uint8Array(analyser.frequencyBinCount);
+    var waveform = new Uint8Array(analyser.fftSize);
+
+
+    var animate = function () {
+      this$1.raf = requestAnimationFrame(animate);
+
+      analyser.getByteFrequencyData(frequencies);
+      analyser.getByteTimeDomainData(waveform);
+
+
+      emoji.forEach(
+        function (s, i) { return s.style.transform = "scale(" + (1 + (frequencies[i]/100)) + ") "; }
+      );
+
+
+    };
+    animate();
+
+
+    Object.assign(this, {media: media, animate: animate});
+  };
+
+  emoji.prototype.pause = function pause () {
+    this.wasPaused = this.media.paused;
+    this.media.pause();
+    cancelAnimationFrame(this.raf);
+  };
+
+  emoji.prototype.resume = function resume () {
+    if(!this.wasPaused) { this.media.play(); }
+    this.raf = requestAnimationFrame(this.animate);
+  };
+
+  return emoji;
+}(Base));
+
 var gain = (function (Demo) {
   function gain () {
     Demo.apply(this, arguments);
@@ -421,6 +495,8 @@ var ButtonDemo = (function (Demo) {
 }(Base));
 
 
+var ease = function (fn) { return function (t, s) { return fn(t) * Math.sin((t / s) * Math.PI); }; };
+
 
 // Math.sin with period of 0..1
 var sin = function (v) { return Math.sin(Math.PI * 2 * v); };
@@ -434,6 +510,17 @@ var adsr = d3.scaleLinear()
     .range( [0, 1,   .3, .3,  0]);
 
 
+var _zag = d3.scaleLinear()
+    .domain([0, 0.5,  1])
+    .range([-1,  1, -1]);
+
+var zag = function (t) { return _zag(t % 1); };
+
+var harmonyz = function (f) { return function (t) { return zag(f * t) +
+  (zag(f * t * 3) / 3) +
+  (zag(f * t * 7) / 7); }; };
+
+
 var buttonNoise = (function (ButtonDemo) {
   function buttonNoise () {
     ButtonDemo.apply(this, arguments);
@@ -445,13 +532,34 @@ var buttonNoise = (function (ButtonDemo) {
 
   buttonNoise.prototype.buttonHandler = function buttonHandler (buttons, sound) {
 
-    var noise = sound(0.5, function (t) { return Math.random() * 0.2; });
+    var noise = sound(.75, function (t) { return Math.random() * 0.2; });
 
     buttons[0].addEventListener('click', noise);
 
   };
 
   return buttonNoise;
+}(ButtonDemo));
+
+
+var buttonEase = (function (ButtonDemo) {
+  function buttonEase () {
+    ButtonDemo.apply(this, arguments);
+  }
+
+  if ( ButtonDemo ) buttonEase.__proto__ = ButtonDemo;
+  buttonEase.prototype = Object.create( ButtonDemo && ButtonDemo.prototype );
+  buttonEase.prototype.constructor = buttonEase;
+
+  buttonEase.prototype.buttonHandler = function buttonHandler (buttons, sound) {
+
+    var noise = sound(.75, ease(function (t) { return Math.random() * 0.2; }));
+
+    buttons[0].addEventListener('click', noise);
+
+  };
+
+  return buttonEase;
 }(ButtonDemo));
 
 
@@ -466,8 +574,8 @@ var buttonHz = (function (ButtonDemo) {
 
   buttonHz.prototype.buttonHandler = function buttonHandler (buttons, sound) {
 
-    var _440hz = sound(0.5, function (t) { return sin(t * 440); });
-    var _880hz = sound(0.5, function (t) { return sin(t * 880); });
+    var _440hz = sound(.75, ease(function (t) { return sin(t * 440); }));
+    var _880hz = sound(.75, ease(function (t) { return sin(t * 880); }));
 
     buttons[0].addEventListener('click', _440hz);
     buttons[1].addEventListener('click', _880hz);
@@ -489,8 +597,8 @@ var buttonHarmony = (function (ButtonDemo) {
 
   buttonHarmony.prototype.buttonHandler = function buttonHandler (buttons, sound) {
 
-    var _440hz = sound(0.5, harmony(440));
-    var _880hz = sound(0.5, harmony(880));
+    var _440hz = sound(.75, ease(harmony(440)));
+    var _880hz = sound(.75, ease(harmony(880)));
 
     buttons[0].addEventListener('click', _440hz);
     buttons[1].addEventListener('click', _880hz);
@@ -514,8 +622,8 @@ var buttonADSR = (function (ButtonDemo) {
      var h440 = harmony(440);
      var h880 = harmony(880);
 
-     var _440hz = sound(.5, function (t) { return adsr(t) * h440(t); } );
-     var _880hz = sound(.5, function (t) { return adsr(t) * h880(t); } );
+     var _440hz = sound(.75, function (t) { return adsr(t) * h440(t); } );
+     var _880hz = sound(.75, function (t) { return adsr(t) * h880(t); } );
 
      buttons[0].addEventListener('click', _440hz);
      buttons[1].addEventListener('click', _880hz);
@@ -523,6 +631,32 @@ var buttonADSR = (function (ButtonDemo) {
   };
 
   return buttonADSR;
+}(ButtonDemo));
+
+
+var buttonD3 = (function (ButtonDemo) {
+  function buttonD3 () {
+    ButtonDemo.apply(this, arguments);
+  }
+
+  if ( ButtonDemo ) buttonD3.__proto__ = ButtonDemo;
+  buttonD3.prototype = Object.create( ButtonDemo && ButtonDemo.prototype );
+  buttonD3.prototype.constructor = buttonD3;
+
+  buttonD3.prototype.buttonHandler = function buttonHandler (buttons, sound) {
+
+     var h440 = ease(harmonyz(440));
+     var h880 = ease(harmonyz(880));
+
+     var _440hz = sound(.75, h440 );
+     var _880hz = sound(.75, h880 );
+
+     buttons[0].addEventListener('click', _440hz);
+     buttons[1].addEventListener('click', _880hz);
+
+  };
+
+  return buttonD3;
 }(ButtonDemo));
 
 var keyboard = (function (Demo) {
@@ -601,11 +735,14 @@ var demos = {
   gain: gain,
   basic: basic,
   plain: plain,
+  emoji: emoji,
 
   buttonNoise: buttonNoise,
+  buttonEase: buttonEase,
   buttonHz: buttonHz,
   buttonHarmony: buttonHarmony,
   buttonADSR: buttonADSR,
+  buttonD3: buttonD3,
 
   keyboard: keyboard
 };

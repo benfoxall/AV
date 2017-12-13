@@ -43,109 +43,120 @@
 
     <h1 id="feeding-the-audio-graph">Feeding the audio graph</h1>
 <p>In 2004, I was given an iPod.</p>
-<p>I count this as one of the most intuitive bits of technology I&#39;ve ever owned.  It wasn&#39;t because of the the snazzy (colour!) menus or circular touchpad.  I loved how smoothly it fitted into my life. I could plug in my headphones, and listen to music while I was out and about.  Then when I got home, I could plug it into my amplifier, and carry on listening there.</p>
-<p>There was no faff.  It didn&#39;t matter if I could find my favourite mix tape, or if my wifi was flakey - it was all just there.</p>
-<p>Nowadays, when I&#39;m trying to pair my phone with some bluetooth speakers, or can&#39;t find my usb-to-headphone jack, or can&#39;t access my music because I don&#39;t have cellular reception; I feel like I&#39;ve taken a step back.</p>
+<p>I count this as one of the most intuitive pieces of technology I&#39;ve ever owned.  It wasn&#39;t because of the the snazzy (colour!) menus or circular touchpad.  I loved how smoothly it fitted into my life. I could plug in my headphones and listen to music while I was walking around town.  Then when I got home, I could plug it into an amplifier and carry on listening there.</p>
+<p>There was no faff. It didn&#39;t matter if I could find my favourite mix tape, or if my wifi was flakey - it was all just there.</p>
+<p>Nowadays, when I&#39;m trying to pair my phone with some bluetooth speakers, or can&#39;t find my usb-to-headphone jack, or even access any music because I don&#39;t have cellular reception; I really miss this simplicity.</p>
 <h3 id="the-web-audio-api">The Web Audio API</h3>
-<p>I think the Web Audio API feels kind of like how my iPod did.</p>
-<p>The Web Audio API looks different from other browser APIs.  Rather than throwing around data, or updating dom elements, you build a network of audio nodes, which the browser can use to generate/process/play sounds.</p>
-<p>Let&#39;s take a look at it.  First of all, we want to get some music to play.  We can do this by creating an <code>&lt;audio&gt;</code> element.</p>
-<pre><code class="lang-html">&lt;audio controls&gt;&lt;source blah /&gt;&lt;/audio&gt;
+<p>I think the Web Audio API feels kind of like my iPod did.</p>
+<p>It&#39;s different from most browser APIs - rather than throwing around data, or updating dom elements - you plug together a graph of audio nodes, which the browser uses to generate/process/play sounds.</p>
+<p>And the thing I like about it is that you can totally plug it into whatever you want, and it&#39;ll mostly just work.</p>
+<p>So, let&#39;s get started. First of all we want an audio source.</p>
+<pre><code class="lang-html">&lt;audio src=&quot;night-owl.mp3&quot; controls /&gt;
 </code></pre>
-<section class="🔈">
-  <audio src="night-owl.mp3" controls></audio>
+<section class="🔈" data-demo="plain">
+  <audio src="night-owl.mp3" controls />
 </section>
 
-<p>Song: <a href="http://freemusicarchive.org/music/Broke_For_Free/Directionless_EP/Broke_For_Free_-_Directionless_EP_-_01_Night_Owl">Night Owl by Broke For Free</a></p>
-<p>Great! This works but it&#39;s playing directly through the browser rather than through using any the Web Audio API.</p>
-<p>We can plug this element into our audio graph by using an <code>AudioSourceNode</code>.  This will capture the output from that element, and allow us to route it into whatever</p>
-<p>This is cool, but it&#39;s playing <strong>directly through the browser</strong>; where we want to be able to control the audio through the Web Audio api. So the first thing we want to do is wire this into an audio graph.</p>
-<p>We can do this by creating an AudioSourceNode - this wraps the output of the element, and allows us to feed the audio into a an audio graph.</p>
-<pre><code class="lang-js">input = audioCtx.createAudioSourceNode(document.querySelector(&#39;audio&#39;))
+<p>(Song - <a href="http://freemusicarchive.org/music/Broke_For_Free/Directionless_EP/Broke_For_Free_-_Directionless_EP_-_01_Night_Owl">Night Owl by Broke For Free</a>)</p>
+<p>This totally works.</p>
+<p>However, it&#39;s not using the Web Audio API, so we can&#39;t access or modify the sound it makes.</p>
+<p>To hook this up to our audio graph, we can use an <em>AudioSourceNode</em>.  This captures the sound from the element, and lets us connect to other nodes in a graph.</p>
+<!-- It's kind of like plugging headphones into my iPod -->
+<pre><code class="lang-js">const audioCtx = new AudioContext()
+
+const audio = document.querySelector(&#39;audio&#39;)
+const input = audioCtx.createAudioSourceNode(audio)
+
 input.connect(audioCtx.destination)
 </code></pre>
 <section class="🔈" data-demo="basic">
   <audio src="night-owl.mp3" controls></audio>
 </section>
 
-<p>Cool.  This looks &amp; sounds exactly the same as before, though the difference is that it&#39;s running through the web audio api.</p>
-<p>Now we can add some audio nodes to this graph and start doing some interesting stuff with it.</p>
-<p><img src="images/graph-simple.svg" alt="Basic audio graph"></p>
+<p>Great. We&#39;ve made something that looks and sounds <em>exactly</em> the same as it did before.</p>
+<!-- Though it's actually a bit awesome-er that that, now we're able to hook this up to other nodes. -->
+<!-- ![Basic audio graph](images/graph-simple.svg) -->
+<p>Go us.</p>
 <h2 id="gain">Gain</h2>
-<p>First, we&#39;ll plug in a gain node - this allows you to alter the volume of an an audio stream.</p>
-<pre><code class="lang-js">// &lt;input type=&quot;number&quot; min=0 max=1 step=0.01 id=&quot;volume&quot; /&gt;
+<p>Let&#39;s plug in a <em>GainNode</em> - this allows you to alter the amplitude (volume) of an an audio stream.</p>
+<p>We can hook this node up to an <code>&lt;input&gt;</code> element by setting the gain property of the node.  (The syntax for this is kind of weird because it&#39;s an <a href="https://developer.mozilla.org/en-US/docs/Web/API/AudioParam">AudioParam</a> which has options to set values at precise intervals).</p>
+<pre><code class="lang-js">const node = audioCtx.createGain()
 
-gain = audioCtx.createGain()
+const input = document.querySelector(&#39;input&#39;)
+input.oninput = () =&gt; node.gain.value = parseFloat(input.value)
 
-volume.value = gain.gain.value
-volume.oninput = () =&gt; gain.gain.value = parseFloat(volume.value)
-
-input.connect(gain)
-gain.connect(audioCtx.destination)
+input.connect(node)
+node.connect(audioCtx.destination)
 </code></pre>
 <section class="🔈" data-demo="gain">
   <audio src="night-owl.mp3" controls></audio>
-  <input type="range" min=0 max=1 step=0.01 />
+  <input type="range" min="0" max="1" step="0.01" />
 </section>
 
-<p>You&#39;ll be able to see now that you can change the value of the input field, and the amplitude of the audio changes.</p>
-<p>You can now hook this to any kind of interface that you want.</p>
-<p><a href="https://uxdesign.cc/the-worst-volume-control-ui-in-the-world-60713dc86950">https://uxdesign.cc/the-worst-volume-control-ui-in-the-world-60713dc86950</a></p>
-<p>So, now - our graph looks like this:</p>
-<p><img src="images/graph-gain.svg" alt="(audio) -&gt; (gain) -&gt; (output)"></p>
+<p>You can now see a range input, which can be dragged to update the state of our graph.</p>
+<p>This input could be any kind of element, so now you&#39;ll be free to build the <a href="https://uxdesign.cc/the-worst-volume-control-ui-in-the-world-60713dc86950">volume control of your dreams</a>.</p>
+<p>There&#39;s a number of nodes that let you modify/filter an audio stream more interesting ways.  Head over to the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API#Defining_audio_effects_filters">MDN Web Audio page</a> for a list of them.</p>
+<!-- ![(audio) -> (gain) -> (output)](images/graph-gain.svg) -->
 <h2 id="analysers">Analysers</h2>
-<p>An interesting node that we can use as an <em>Analyser</em> Node, this allows us to inspect the audio data that is flowing through our graph.</p>
-<p>We can add an analyser node in the same way as we did the gain node, and it won&#39;t make any difference to the audio that god through it.</p>
-<pre><code>analyser = audioCtx.createAnalyser
+<p>Something else we can add to our graph is an <em>AnalyserNode</em>.</p>
+<p>This doesn&#39;t modify the audio at all, but allows us to inspect the sounds that are flowing through it.</p>
+<p>We can put this into our graph between our <em>AudioSourceNode</em> and the <em>GainNode</em>.</p>
+<pre><code class="lang-js">const analyser = audioCtx.createAnalyser()
 
 input.connect(analyser)
 analyser.connect(gain)
 gain.connect(audioCtx.destination)
-</code></pre><p><img src="images/graph-gain.svg" alt="(audio) -&gt; (analyser) -&gt; (gain) -&gt; (output)"></p>
-<p>Now, from elsewhere in our code, we can request data from the analyser node, and we&#39;ll get back an array that we can display in any way that we want.</p>
+</code></pre>
+<!-- ![(audio) -> (analyser) -> (gain) -> (output)](images/graph-gain.svg) -->
+<p>And now we have an analyser. We can access it from elsewhere to drive any kind of visuals.  For instance, if we wanted to draw lines on a canvas we could totally do that:</p>
 <pre><code class="lang-js">const waveform = new Uint8Array(analyser.fftSize)
 const frequencies = new Uint8Array(analyser.frequencyBinCount)
+const ctx = canvas.getContext(&#39;2d&#39;)
 
 const loop = () =&gt; {
     requestAnimationFrame(loop)
     analyser.getByteTimeDomainData(waveform)
     analyser.getByteFrequencyData(frequencies)
 
-    // draw anything we want
+    ctx.beginPath()
+    waveform.forEach((f, i) =&gt; ctx.lineTo(i, f))
+    ctx.lineTo(0,255)
+    frequencies.forEach((f, i) =&gt; ctx.lineTo(i, 255-f))
+    ctx.stroke()
 }
 loop()
 </code></pre>
-<p>The nice thing about this is that we&#39;re not tied to any functionality of the audio stream - it&#39;s completely up to us when we query the analyser node,  and we could feed it into anything we want.</p>
-<p>For example, if we wanted to draw this data to a canvas, we could do it with the following code:</p>
-<pre><code class="lang-js">ctx.beginPath()
-waveform.forEach((f, i) =&gt; ctx.lineTo(i, f))
-ctx.stroke()
-
-ctx.beginPath()
-frequencies.forEach((f, i) =&gt; ctx.lineTo(i, 255-f))
-ctx.stroke()
-</code></pre>
 <section class="🔈" data-demo="analyser">
   <audio src="night-owl.mp3" controls></audio>
-  <input type="range" min=0 max=1 step=0.01 />
+  <input type="range" min="0" max="1" step="0.01" />
   <canvas width="700" height="300"></canvas>
-  <!-- <div>
-    <button>440hz</button>
-  </div> -->
 </section>
 
-<p>[[audio, input, canvas]]</p>
-<p>The two lines you can see here are:</p>
-<ul>
-<li>the waveform - this kind of plots air pressure against time</li>
-<li>the frequencies - this shows the …</li>
-</ul>
-<p>What&#39;s nice about this, is that you can plug it into whatever you want.  It could be a canvas, or webgl attributes, or updating elements, or even setting css variables.</p>
+
+<p>You can see that we have two arrays of data available (I added colours for clarity):</p>
+<ol>
+<li>The waveform - the raw samples of the audio being played.</li>
+<li>The frequencies - a <a href="https://giphy.com/gifs/Km4XeiMqFNCDK/html5">fourier transform</a> of the audio passing through the node.</li>
+</ol>
+<p>What&#39;s cool about this is that you&#39;re not tied to any specific functionality of the Web Audio API.  If it&#39;s possible for you update something with an array of numbers, then you can just apply it to the output of the analyser node.</p>
+<p>For instance, if we <em>wanted to</em>, we could definitely animate a list of emoji in time with our music.</p>
+<pre><code class="lang-js">spans.forEach(
+  (s, i) =&gt; s.style.transform = `scale(${1 + (frequencies[i]/100)})`
+)
+</code></pre>
+<section class="🔈" data-demo="emoji">
+  <audio src="night-owl.mp3" controls></audio>
+  <input type="range" min="0" max="1" step="0.01" />
+  <div class="emoji">
+    <span>🔈</span><span>🎤</span><span>🎤</span><span>🎤</span><span>🎺</span><span>🎷</span><span>📯</span><span>🎶</span><span>🔊</span><span>🎸</span><span>🎺</span><span>🎤</span><span>🎸</span><span>🎼</span><span>🎷</span><span>🎺</span><span>🎻</span><span>🎸</span><span>🎻</span><span>🎺</span><span>🎸</span><span>🎶</span><span>🥁</span><span>🎶</span><span>🎵</span><span>🎵</span><span>🎷</span><span>📯</span><span>🎸</span><span>🎹</span><span>🎤</span><span>🎷</span><span>🎻</span><span>🎷</span><span>🔈</span><span>🔊</span><span>📯</span><span>🎼</span><span>🎤</span><span>🎵</span><span>🎼</span><span>📯</span><span>🥁</span><span>🎻</span><span>🎻</span><span>🎤</span><span>🔉</span><span>🎵</span><span>🎹</span><span>🎸</span><span>🎷</span><span>🔉</span><span>🔈</span><span>🔉</span><span>🎷</span><span>🎶</span><span>🔈</span><span>🎸</span><span>🎸</span><span>🎻</span><span>🎤</span><span>🥁</span><span>🎼</span><span>📯</span><span>🎸</span><span>🎸</span><span>🎼</span><span>🎸</span><span>🥁</span><span>🎼</span><span>🎶</span><span>🎶</span><span>🥁</span><span>🎤</span><span>🔊</span><span>🎷</span><span>🔊</span><span>🔈</span><span>🎺</span><span>🔊</span><span>🎻</span><span>🎵</span><span>🎻</span><span>🎸</span><span>🎵</span><span>🎺</span><span>🎤</span><span>🎷</span><span>🎸</span><span>🎶</span><span>🎼</span><span>📯</span><span>🔈</span><span>🎺</span><span>🎤</span><span>🎵</span><span>🎸</span><span>🎸</span><span>🔊</span><span>🎶</span><span>🎤</span><span>🥁</span><span>🎵</span><span>🎹</span><span>🎸</span><span>🔈</span><span>🎻</span><span>🔉</span><span>🥁</span><span>🔉</span><span>🎺</span><span>🔊</span><span>🎹</span><span>🥁</span><span>🎷</span><span>📯</span><span>🎷</span><span>🎷</span><span>🎤</span><span>🎸</span><span>🔉</span><span>🎹</span><span>🎷</span><span>🎸</span><span>🎺</span><span>🎼</span><span>🎤</span><span>🎼</span><span>🎶</span><span>🎷</span><span>🎤</span><span>🎷</span><span>📯</span><span>📯</span><span>🎻</span><span>🎤</span><span>🎷</span><span>📯</span><span>🎹</span><span>🔈</span><span>🎵</span><span>🎹</span><span>🎼</span><span>🔊</span><span>🔉</span><span>🔉</span><span>🔈</span><span>🎶</span><span>🎸</span><span>🥁</span><span>🎺</span><span>🔈</span><span>🎷</span><span>🎵</span><span>🔉</span><span>🥁</span><span>🎷</span><span>🎹</span><span>🎷</span><span>🔊</span><span>🎤</span><span>🎤</span><span>🔊</span><span>🎤</span><span>🎤</span><span>🎹</span><span>🎸</span><span>🎹</span><span>🔉</span><span>🎷</span>
+  </div>
+</section>
+
 <h3 id="generating-audio">Generating Audio</h3>
-<p>So far we&#39;ve used an <audio> element, though it&#39;s also possible to generate our own audio and feed it into our audio graph.</p>
-<p>There&#39;s a few ways to do this, though the one we&#39;re going to look at is an AudioBufferNode.</p>
-<p>This allows you to generate an array of samples (value at each timestamp), which you can then wrap up and play in exactly the same way we did the <audio> element before.</p>
-<p>This can get a bit boring, so we&#39;ll use a helper method that will let us easily generate a sound:</p>
+<p>So far, we&#39;ve been using the <code>&lt;audio&gt;</code> element as a source of sound.</p>
+<p>There&#39;s <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API#Defining_audio_sources">a few</a> other sources of audio that we can use.  We&#39;ll look at the <em>AudioBufferNode</em> - which allows you to manually generate a sound sample, and then connect it to our graph.</p>
+<p>First have to create an <em>AudioBuffer</em>, which holds our raw data, then we pass that to an <em>AudioBufferNode</em> which we can then treat just like our <em>AudioSource</em> node.</p>
+<p>This can get a bit boring, so we&#39;ll use a helper method that makes it simpler to generate sounds.</p>
 <pre><code class="lang-js">const generator = (audioCtx, target) =&gt; (seconds, fn) =&gt; {
   const { sampleRate } = audioCtx
 
@@ -167,86 +178,115 @@ ctx.stroke()
   }
 }
 
-const sound = generator(audioCtx)
+const sound = generator(audioCtx, gain)
 </code></pre>
-<p>Now we can write a function, that takes time, and maps it to a sample which we can then play through our browser.  For example, the following will generate 0.5 seconds of white noise at 20% volume (because, um, noise is a bit… noisy?).</p>
-<pre><code class="lang-js">const noise = sound(0.5, t =&gt; Math.random() * 0.2)
+<p>Our wrapper will let us provide a function that maps time (in seconds) to a sample (between 1 and -1). This generates a waveform, like we saw before with the analyser node.</p>
+<p>For example, the following will generate 0.75 seconds of white noise at 20% volume.</p>
+<pre><code class="lang-js">const noise = sound(0.75, t =&gt; Math.random() * 0.2)
+
+button.onclick = noise
 </code></pre>
 <section class="🔈" data-demo="buttonNoise">
   <div>
     <button>Noise</button>
   </div>
-  <input type="range" min=0 max=1 step=0.01 />
+  <input type="range" min="0" max="1" step="0.01" />
   <canvas width="700" height="300"></canvas>
 </section>
 
-<p>Now, when we click that button, we&#39;ll hear a random noise from our speaker.  Very handy!</p>
-<p>Our audio graph has changed a bit, rather than being static, every time we press a button, a new node is being created &amp; added, and being played through the speakers.</p>
-<p>/ [buffer]   (source) =&gt; (analyser) =&gt; (gain) =&gt; (output)</p>
-<p>The cool thing about this is that we can use this to generate all sorts of sounds and effects as mathematical functions.</p>
-<p>For instance, we can build simple oscillator sounds:</p>
-<pre><code class="lang-js">// Math.sin with period of 0..1
-const sin = v =&gt; Math.sin(Math.PI * 2 * v)
+<p>Now we&#39;ve got a noisy button! Handy.</p>
+<p>Rather than having a static set of audio nodes, each time we click the button, we add a new node to our graph. Although this feels inefficient, it&#39;s not actually too bad - the browser can do a good job of cleaning up old nodes once they&#39;ve played.</p>
+<!-- / [buffer]   (source) => (analyser) => (gain) => (output) -->
+<p>An interesting property of defining sounds as functions, is that we can combine multiple function to generate new sounds.</p>
+<p>So if we wanted to fade our noise in &amp; out, we could write a higher order function that does that.</p>
+<pre><code class="lang-js">const ease = fn =&gt; (t, s) =&gt;
+  fn(t) * Math.sin((t / s) * Math.PI)
 
-const _440hz = sound(0.5, t =&gt; sin(t * 440))
-const _880hz = sound(0.5, t =&gt; sin(t * 880))
+const noise = sound(0.75, ease(t =&gt; Math.random() * 0.2))
+</code></pre>
+<section class="🔈" data-demo="buttonEase">
+  <div>
+    <button>ease(noise)</button>
+  </div>
+  <input type="range" min="0" max="1" step="0.01" />
+  <canvas width="700" height="300"></canvas>
+</section>
+
+<p>And we can do more than just white noise - if we use <code>Math.sin</code>, we can generate some nice pure tones.</p>
+<pre><code class="lang-js">// Math.sin with period of 0..1
+const wave = v =&gt; Math.sin(Math.PI * 2 * v)
+const hz = f =&gt; t =&gt; wave(t * f)
+
+const _440hz = sound(0.75, ease(hz(440)))
+const _880hz = sound(0.75, ease(hz(880)))
 </code></pre>
 <section class="🔈" data-demo="buttonHz">
   <div>
     <button data-hz="440">440Hz</button>
     <button data-hz="880">880Hz</button>
   </div>
-  <input type="range" min=0 max=1 step=0.01 />
+  <input type="range" min="0" max="1" step="0.01" />
   <canvas width="700" height="300"></canvas>
 </section>
 
-<p>Since we&#39;re now expressing sounds as simple functions, we can start introducing higher order logic to implement new sounds &amp; effects.</p>
-<p>For instance, if we want to have a richer, more harmonic, sound we can write a higher order function that combines multiple frequencies together:</p>
-<pre><code>const harmony = f =&gt; [4, 3, 2, 1].reduce(
+<p>We can also make our functions more complex. Below we&#39;re combining several frequencies to make a richer sounding tone.</p>
+<pre><code class="lang-js">const harmony = f =&gt; [4, 3, 2, 1].reduce(
     (v, h, i) =&gt; (sin(f * h) * (i+1) ) + v
 )
 
-const a440 = sound(0.5, harmony(440))
-</code></pre><section class="🔈" data-demo="buttonHarmony">
+const a440 = sound(0.75, ease(harmony(440)))
+</code></pre>
+<section class="🔈" data-demo="buttonHarmony">
   <div>
     <button data-hz="440">440Hz</button>
     <button data-hz="880">880Hz</button>
   </div>
-  <input type="range" min=0 max=1 step=0.01 />
+  <input type="range" min="0" max="1" step="0.01" />
   <canvas width="700" height="300"></canvas>
 </section>
 
+<p>Cool.</p>
+<p>We&#39;re still not using any audio-specific functionality, so we can repurpose anything that does an operation on data.</p>
+<p>For example, we can use <a href="https://d3js.org/">d3.js</a> - usually used for interactive data visualisations - to generate a triangular waveform.</p>
+<pre><code class="lang-js">const triangle = d3.scaleLinear()
+    .domain([0, .5,  1])
+    .range([-1,  1, -1])
 
-<p>And because we&#39;re not using any audio-specific functionality here, we can repurpose anything that does an operation on data.</p>
-<p>For instance, we can implement an ADSR envelope (which will make our note sound more like it&#39;s been pressed with a keyboard) with d3.</p>
-<pre><code>const adsr = d3.scale()
+const wave = t =&gt; triangle(t % 1)
 
-const a440 = sound(0.5, (t, s) =&gt;
-    harmony(440)(t) * adsr(s)
-)
-</code></pre><section class="🔈" data-demo="buttonADSR">
+const a440 = sound(0.75, ease(harmony(440)))
+</code></pre>
+<section class="🔈" data-demo="buttonD3">
   <div>
     <button data-hz="440">440Hz</button>
     <button data-hz="880">880Hz</button>
   </div>
-  <input type="range" min=0 max=1 step=0.01 />
+  <input type="range" min="0" max="1" step="0.01" />
   <canvas width="700" height="300"></canvas>
 </section>
 
-
-<p>… Go and experiment yourself</p>
-<p><a href="https://jsbin.com/tawenuh/edit?js,output">https://jsbin.com/tawenuh/edit?js,output</a></p>
-<h3 id="-a-departure-from-best-practice-">(A departure from best practice)</h3>
-<p>What we&#39;ve implemented with our manual function can actually be represented in a series of native audio nodes.</p>
-<p>(oscillator) -&gt; (gain) -&gt; (destination)</p>
-<p>Which will totally be more performant (because it&#39;s not happening on the main thread), and more flexible in some ways (because you can set timings dynamically whilst the note is playing).</p>
-<p>But we&#39;re going to stay with this approach because it&#39;s fun, and sometimes the fun thing to do might not technically be the best.</p>
-<ul>
-<li>todo - &#39;from scratch&#39;</li>
-</ul>
+<p>… It&#39;s pretty interesting to play around with different functions.  I&#39;ve plonked everything in <a href="https://jsbin.com/tawenuh/edit?js,output">jsbin</a> if you want to have a play yourself.</p>
+<h3 id="a-departure-from-best-practice">A departure from best practice</h3>
+<p>We&#39;ve been generating our audio from scratch, but most of what we&#39;ve looked at can be implemented by a series of native Web Audio nodes.</p>
+<!-- (oscillator) -> (gain) -> (destination) -->
+<p>This would be way performant (because it&#39;s not happening on the main thread), and more flexible in some ways (because you can set timings dynamically whilst the note is playing).</p>
+<p>But we&#39;re going to stay with this approach because it&#39;s fun, and sometimes the fun thing to do might not technically be the best thing to do.</p>
 <h3 id="making-a-keyboard">Making a keyboard</h3>
-<p>Having a button that makes a sound is totally great, but how about lots of buttons that make lots of sounds?  Yup, totally way-greater-er.</p>
-<p>Because I&#39;m pretty terrible at CSS, I&#39;ve drawn an SVG image of a keyboard below:</p>
+<p>Having a button that makes a sound is totally great, but how about lots of buttons that make lots of sounds?  Yup, totally greater-er.</p>
+<p>The first thing we need to know the what frequency each note is.</p>
+<p>I thought this would be awkward because pianos were invented more than 250 years before the Hz unit was defined, so surely there wouldn&#39;t be a simple mapping between the two?</p>
+<pre><code class="lang-js">const freq = note =&gt; 27.5 * Math.pow(2, (note - 21) / 12)
+</code></pre>
+<p>This equation blows my mind; I&#39;d never really figured how tightly music and maths fit together.  When you see a chord or melody, you can directly map it back to a mathematical pattern.</p>
+<p>So, our keyboard is actually an SVG picture of a keyboard, so we can traverse the elements of it and map each element to a sound generated by one of the functions that we came up with before.</p>
+<pre><code class="lang-js">Array.from(svg.querySelector(&#39;rect&#39;))
+  .sort((a, b) =&gt; + a.x - b.x)
+  .forEach((key, i) =&gt;
+    key.addEventListener(&#39;touchstart&#39;,
+      sound(0.75, ease(harmony(freq(i + 48))))
+    )
+  )
+</code></pre>
 <section class="🔈" data-demo="keyboard">
   <svg viewBox="0 0 600 250" width="600" height="250" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><rect class="key" fill="#FFF" x="33" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="71.538" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="110.077" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="148.615" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="187.154" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="225.692" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="264.231" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="302.769" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="341.308" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="379.846" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="418.385" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="456.923" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="495.462" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#FFF" x="534" y="65" width="35" height="121" rx="4"/><rect class="key" fill="#383838" x="60" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="99" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="176" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="214" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="253" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="330" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="368" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="445" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="484" y="59" width="20" height="65" rx="4"/><rect class="key" fill="#383838" x="522" y="59" width="20" height="65" rx="4"/></g></svg>
 
@@ -257,33 +297,17 @@ const a440 = sound(0.5, (t, s) =&gt;
   </style>
 </section>
 
-<p>We can map the elements of this image, to different notes that we&#39;ve generated.  All we have to do is work out what frequency each of the notes should be.</p>
-<p>I thought this would be hard because pianos were invented more than 250 years before the Hz unit was even defined, so surely there wouldn&#39;t be a simple mapping between the two?</p>
-<pre><code>const freq = note =&gt; 27.5 * Math.pow(2, (note - 21) / 12)
-</code></pre><p>This equation blows my mind.  It takes a midi note (each key on the keyboard is numbered), and returns the frequency of that note.</p>
-<p>So now, we&#39;re able to hook up our SVG to the audio that we&#39;ve created:</p>
-<pre><code>Array.from(svg.querySelector(&#39;rect&#39;))
-    .sort((a, b) =&gt; a.cx - b.cx)
-    .forEach((key, i) =&gt;
-        key.addEventListener(&#39;touchstart&#39;,
-            sound(0.5, (t, s) =&gt; adsr(s) * sin(freq(i) * t)
-        )
-    )
-</code></pre><p>And, voilà. Our keyboard works:</p>
-<p>[working keyboard]</p>
-<p>Something that&#39;s kind of fun about this is that we can apply our code to any SVG at all and make a keyboard out of it.</p>
-<p>[</p>
+<p>Et voilà. We have a keyboard.</p>
+<p>What I like about this is that it&#39;s completely pure - there&#39;s no lookup tables or hardcoded attributes; we&#39;ve just defined a mapping from svg elements to the sound they should probably make.</p>
+<!-- Something that's kind of fun about this is that we can apply our code to any SVG at all and make a keyboard out of it. -->
 <h3 id="doing-better-in-the-future">Doing better in the future</h3>
-<p>As I mentioned before, some of this could be implemented more performantly with WebAudio nodes,  or even better - you let something like Tone.js or Howler.js be performant for you.</p>
-<p>There&#39;s also some new challenges with immersive WebXR experiences, where spatial audio becomes really important.  <a href="https://googlechrome.github.io/omnitone/#home">https://googlechrome.github.io/omnitone/#home</a></p>
+<p>As I mentioned before, this could be implemented more performantly with Web Audio nodes, or even better - you use something like <a href="https://tonejs.github.io/">Tone.js</a> to be performant for you.</p>
+<p>Web Audio has been around for a while, though we&#39;re getting new challenges with immersive WebXR experiences, where <a href="https://googlechrome.github.io/omnitone/#home">spatial audio</a> becomes really important.</p>
+<p>There&#39;s also always support &amp; api improvements (if you like <em>AudioBufferNode</em>, you&#39;re going to <em>love</em> <a href="https://webaudio.github.io/web-audio-api/#AudioWorklet"><em>AudioWorklet</em></a>)</p>
 <h3 id="conclusion">Conclusion</h3>
 <p>And that&#39;s about it.</p>
 <p>Web Audio isn&#39;t some black box, you can easily link it with whatever framework, or UI that you&#39;ve built (whether you should, is an entirely different question).</p>
-<p>If anyone ever asks you &quot;could you turn this SVG into a musical instrument&quot; you don&#39;t have to stare blankly at them anymore.</p>
-<p>If you&#39;re interested in the web audio api, there&#39;s heaps of information on MDN. There&#39;s also some interesting features coming up in the future (AudioWorklets look pretty cool).</p>
-<p><a href="https://webaudio.github.io/web-audio-api/#AudioWorklet">https://webaudio.github.io/web-audio-api/#AudioWorklet</a></p>
-<hr>
-<p>Howler.js</p>
+<p>And if anyone ever asks you &quot;could you turn this SVG into a musical instrument&quot; you don&#39;t have to stare blankly at them anymore.</p>
 <hr>
 <p>Ben Foxall is a JavaScript Engineer and Adventurist. After 16 years of avoiding the subject; he&#39;d like to tell Jamie that he probably did lose that mix-tape - he&#39;s sorry about, but also, he&#39;s not sure it was as good as Jamie made out.  Oh and also, Chris, sorry for breaking your phone, and that I still laugh every time I think about it.</p>
 
